@@ -14,27 +14,27 @@ class FFmpeg(EventEmitter):
     def __init__(self, executable='ffmpeg'):
         super().__init__()
 
-        self._executable = executable
+        self.executable = executable
 
-        self._global_options = {}
-        self._input_files = []
-        self._output_files = []
+        self.global_options = {}
+        self.input_files = []
+        self.output_files = []
 
         self.executed = False
 
     def global_option(self, key, value=None):
-        self._global_options[key] = value
+        self.global_options[key] = value
         return self
 
     def input_file(self, url, **kwargs):
-        self._input_files.append(FFmpeg.File(
+        self.input_files.append(FFmpeg.File(
             url=url,
             options=kwargs
         ))
         return self
 
     def output_file(self, url, **kwargs):
-        self._output_files.append(FFmpeg.File(
+        self.output_files.append(FFmpeg.File(
             url=url,
             options=kwargs
         ))
@@ -61,14 +61,14 @@ class FFmpeg(EventEmitter):
         self.emit('completed', process)
 
     def _build(self):
-        arguments = [self._executable]
-        arguments += build_options(self._global_options)
+        arguments = [self.executable]
+        arguments += build_options(self.global_options)
 
-        for file in self._input_files:
+        for file in self.input_files:
             arguments += build_options(file.options)
             arguments += ['-i', file.url]
 
-        for file in self._output_files:
+        for file in self.output_files:
             arguments += build_options(file.options)
             arguments += [file.url]
 
