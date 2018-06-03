@@ -5,6 +5,8 @@ from pyee import EventEmitter
 
 from .utils import build_options, readline, parse_progress
 
+class FFmpegError(Exception):
+    pass
 
 class FFmpeg(EventEmitter):
     File = collections.namedtuple('File', ['url', 'options'])
