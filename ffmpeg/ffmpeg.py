@@ -21,6 +21,7 @@ class FFmpeg(EventEmitter):
         self.output_files = []
 
         self.executed = False
+        self.process = None
 
     def global_option(self, key, value=None):
         self.global_options[key] = value
@@ -50,15 +51,16 @@ class FFmpeg(EventEmitter):
                 if progress:
                     self.emit('progress', process, progress)
 
-        process = await asyncio.create_subprocess_exec(
+        self.process = await asyncio.create_subprocess_exec(
             *self._build(),
             stderr=asyncio.subprocess.PIPE
         )
-        await read_progress(process)
         self.executed = True
 
-        await process.wait()
-        self.emit('completed', process)
+        await read_progress(self.process)
+
+        await self.process.wait()
+        self.emit('completed', self.process)
 
     def _build(self):
         arguments = [self.executable]
