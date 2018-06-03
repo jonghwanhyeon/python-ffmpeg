@@ -17,7 +17,7 @@ def build_options(options):
         if key.startswith('-'):
             key = key[1:]
 
-        argument = ['-{key}'.format(key=key.replace('__', ':'))]
+        argument = ['-{key}'.format(key=key)]
         if value is not None:
             argument.append(str(value))
 
