@@ -20,6 +20,8 @@ class FFmpeg(EventEmitter):
         self._input_files = []
         self._output_files = []
 
+        self.executed = False
+
     def global_option(self, key, value=None):
         self._global_options[key] = value
         return self
@@ -39,6 +41,9 @@ class FFmpeg(EventEmitter):
         return self
 
     async def run(self):
+        if self.executed:
+            raise FFmpegError('FFmpeg is already executed')
+
         async def read_progress(process):
             async for line in readline(process.stderr):
                 progress = parse_progress(line.decode('utf-8'))
@@ -50,6 +55,7 @@ class FFmpeg(EventEmitter):
             stderr=asyncio.subprocess.PIPE
         )
         await read_progress(process)
+        self.executed = True
 
         await process.wait()
         self.emit('completed', process)
