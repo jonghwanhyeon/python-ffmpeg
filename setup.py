@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='python-ffmpeg',
     version='1.0.0',
-    # description='A library to query a player\'s overwatch stats from Battle.net',
+    description='A python interface for FFmpeg',
     url='https://github.com/jonghwanhyeon/python-ffmpeg',
     author='Jonghwan Hyeon',
     author_email='hyeon0145@gmail.com',
