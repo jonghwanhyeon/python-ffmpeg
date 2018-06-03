@@ -7,7 +7,7 @@ setup(
     url='https://github.com/jonghwanhyeon/python-ffmpeg',
     author='Jonghwan Hyeon',
     author_email='hyeon0145@gmail.com',
-    # license='MIT',
+    license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
