@@ -50,7 +50,7 @@ def parse_progress(line):
 
     return Progress(
         frame=int(items['frame']),
-        fps=int(items['frame']),
+        fps=int(items['fps']),
         size=int(items['size'].replace('kB', '')) * 1024,
         time=items['time'],
         bitrate=float(items['bitrate'].replace('kbits/s', '')),
