@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='python-ffmpeg',
-    version='1.0.1',
+    version='1.0.2',
     description='A python interface for FFmpeg',
     url='https://github.com/jonghwanhyeon/python-ffmpeg',
     author='Jonghwan Hyeon',
