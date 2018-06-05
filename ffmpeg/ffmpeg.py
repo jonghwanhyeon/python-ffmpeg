@@ -90,7 +90,7 @@ class FFmpeg(EventEmitter):
         async for line in readlines(self._process.stderr):
             self.emit('stderr', line.decode('utf-8'))
 
-    def _on_stderr(self, line): # registered in __init__()
+    def _on_stderr(self, line):  # registered in __init__()
         progress = parse_progress(line)
         if progress:
             self.emit('progress', progress)
