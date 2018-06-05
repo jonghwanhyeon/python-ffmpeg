@@ -26,18 +26,18 @@ def build_options(options):
     return arguments
 
 
-    pattern = re.compile(br'\r\n|\r|\n')
 async def readlines(stream):
+    pattern = re.compile(br'[\r\n]+')
 
     data = bytearray()
     while not stream.at_eof():
-        data.extend(await stream.read(1))
-
         lines = pattern.split(data)
-        for line in lines[:-1]:
+        data[:] = lines.pop(-1)
+
+        for line in lines:
             yield line
 
-        data[:] = lines[-1]
+        data.extend(await stream.read(1024))
 
 
 def parse_progress(line):
