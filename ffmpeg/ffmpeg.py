@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import signal
 import sys
@@ -6,6 +7,17 @@ from collections import namedtuple
 from pyee import EventEmitter
 
 from .utils import build_options, parse_progress, readlines
+
+_windows = (sys.platform == 'win32')
+
+
+def _create_subprocess(*args, **kwargs):
+    if _windows:
+        # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.asyncio.subprocess.Process.send_signal
+        from subprocess import CREATE_NEW_PROCESS_GROUP
+        kwargs['creationflags'] = CREATE_NEW_PROCESS_GROUP
+
+    return asyncio.create_subprocess_exec(*args, **kwargs)
 
 
 class FFmpegError(Exception):
@@ -58,7 +70,7 @@ class FFmpeg(EventEmitter):
         arguments = self._build()
         self.emit('start', arguments)
 
-        self._process = await asyncio.create_subprocess_exec(
+        self._process = await _create_subprocess(
             *arguments,
             stderr=asyncio.subprocess.PIPE
         )
@@ -79,7 +91,7 @@ class FFmpeg(EventEmitter):
             raise FFmpegError('FFmpeg is not executed')
 
         sigterm = signal.SIGTERM
-        if sys.platform == 'win32':  # On Windows, SIGTERM -> TerminateProcess()
+        if _windows:  # On Windows, SIGTERM -> TerminateProcess()
             # https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg.c#L356
             sigterm = signal.CTRL_C_EVENT
 
