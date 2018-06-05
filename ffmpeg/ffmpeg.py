@@ -93,7 +93,7 @@ class FFmpeg(EventEmitter):
         sigterm = signal.SIGTERM
         if _windows:  # On Windows, SIGTERM -> TerminateProcess()
             # https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg.c#L356
-            sigterm = signal.CTRL_C_EVENT
+            sigterm = signal.CTRL_BREAK_EVENT
 
         self._terminated = True
         self._process.send_signal(sigterm)
