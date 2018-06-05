@@ -1,4 +1,6 @@
 import asyncio
+import signal
+import sys
 
 from collections import namedtuple
 from pyee import EventEmitter
@@ -76,8 +78,13 @@ class FFmpeg(EventEmitter):
         if not self._executed:
             raise FFmpegError('FFmpeg is not executed')
 
+        sigterm = signal.SIGTERM
+        if sys.platform == 'win32':  # On Windows, SIGTERM -> TerminateProcess()
+            # https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg.c#L356
+            sigterm = signal.CTRL_C_EVENT
+
         self._terminated = True
-        self._process.terminate()
+        self._process.send_signal(sigterm)
 
     async def _read_stderr(self):
         async for line in readlines(self._process.stderr):
