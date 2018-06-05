@@ -3,7 +3,7 @@ import asyncio
 from collections import namedtuple
 from pyee import EventEmitter
 
-from .utils import build_options, readline, parse_progress
+from .utils import build_options, parse_progress, readlines
 
 
 class FFmpegError(Exception):
@@ -80,7 +80,7 @@ class FFmpeg(EventEmitter):
         self._process.terminate()
 
     async def _read_stderr(self):
-        async for line in readline(self._process.stderr):
+        async for line in readlines(self._process.stderr):
             self.emit('stderr', line.decode('utf-8'))
 
     def _on_stderr(self, line): # registered in __init__()

@@ -26,8 +26,8 @@ def build_options(options):
     return arguments
 
 
-async def readline(stream):
     pattern = re.compile(br'\r\n|\r|\n')
+async def readlines(stream):
 
     data = bytearray()
     while not stream.at_eof():
