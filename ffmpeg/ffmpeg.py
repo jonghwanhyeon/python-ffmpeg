@@ -59,10 +59,6 @@ class FFmpeg(EventEmitter):
         self._output_files.append(FFmpeg._File(url=url, options={**options, **kwargs}))
         return self
 
-    @property
-    def process(self):
-        return self._process
-
     async def execute(self):
         if self._executed:
             raise FFmpegError('FFmpeg is already executed')
