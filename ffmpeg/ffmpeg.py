@@ -1,5 +1,5 @@
-import sys
 import asyncio
+import os
 import signal
 import sys
 
@@ -59,7 +59,7 @@ class FFmpeg(EventEmitter):
         self._output_files.append(FFmpeg._File(url=url, options={**options, **kwargs}))
         return self
 
-    async def execute(self):
+    async def execute(self, stream=None):
         if self._executed:
             raise FFmpegError('FFmpeg is already executed')
 
@@ -68,12 +68,16 @@ class FFmpeg(EventEmitter):
 
         self._process = await _create_subprocess(
             *arguments,
-            stderr=asyncio.subprocess.PIPE
+            stdin=asyncio.subprocess.PIPE if stream else None,
+            stderr=asyncio.subprocess.PIPE,
         )
 
         self._executed = True
-        await self._read_stderr()
-        await self._process.wait()
+        await asyncio.wait([
+            self._write_stdin(stream),
+            self._read_stderr(),
+            self._process.wait(),
+        ])
 
         if self._process.returncode == 0:
             self.emit('completed')
@@ -93,6 +97,13 @@ class FFmpeg(EventEmitter):
 
         self._terminated = True
         self._process.send_signal(sigterm)
+
+    async def _write_stdin(self, stream):
+        if not stream:
+            return
+
+        while not stream.at_eof():
+            self._process.stdin.write(await stream.read(1024))
 
     async def _read_stderr(self):
         async for line in readlines(self._process.stderr):
