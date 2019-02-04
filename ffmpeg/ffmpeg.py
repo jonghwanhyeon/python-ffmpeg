@@ -104,6 +104,7 @@ class FFmpeg(EventEmitter):
 
         while not stream.at_eof():
             self._process.stdin.write(await stream.read(1024))
+        self._process.stdin.write_eof()
 
     async def _read_stderr(self):
         async for line in readlines(self._process.stderr):
