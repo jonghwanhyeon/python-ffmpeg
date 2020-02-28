@@ -48,11 +48,21 @@ def parse_progress(line):
     if not items:
         return None
 
+    if items['size'] == 'N/A':
+        size = None
+    else:
+        size = int(items['size'].replace('kB', '')) * 1024
+
+    if items['bitrate'] == 'N/A':
+        bitrate = None
+    else:
+        bitrate = float(items['size'].replace('kbits/s', ''))
+
     return Progress(
         frame=int(items['frame']),
         fps=float(items['fps']),
-        size=int(items['size'].replace('kB', '')) * 1024,
+        size=size,
         time=items['time'],
-        bitrate=float(items['bitrate'].replace('kbits/s', '')),
+        bitrate=bitrate,
         speed=float(items['speed'].replace('x', '')),
     )
