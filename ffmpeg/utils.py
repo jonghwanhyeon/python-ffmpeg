@@ -56,7 +56,7 @@ def parse_progress(line):
     if items['bitrate'] == 'N/A':
         bitrate = None
     else:
-        bitrate = float(items['size'].replace('kbits/s', ''))
+        bitrate = float(items['bitrate'].replace('kbits/s', ''))
 
     return Progress(
         frame=int(items['frame']),
