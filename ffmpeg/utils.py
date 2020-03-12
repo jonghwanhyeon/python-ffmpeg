@@ -9,7 +9,6 @@ progress_pattern = re.compile(
     r'(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)'
 )
 
-
 def build_options(options):
     arguments = []
 
@@ -40,29 +39,34 @@ async def readlines(stream):
         data.extend(await stream.read(1024))
 
 
+# Reference: https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg.c#L1646
 def parse_progress(line):
+    default = {
+        'frame': '0',
+        'fps': '0.0',
+        'size': '0kB',
+        'time': '00:00:00.00',
+        'bitrate': '0.0kbits/s',
+        'speed': '0.0x',
+    }
+
     items = {
-        key: value for key, value in progress_pattern.findall(line)
+        key: value for key, value in progress_pattern.findall(line) if value != 'N/A'
     }
 
     if not items:
         return None
 
-    if items['size'] == 'N/A':
-        size = None
-    else:
-        size = int(items['size'].replace('kB', '')) * 1024
-
-    if items['bitrate'] == 'N/A':
-        bitrate = None
-    else:
-        bitrate = float(items['bitrate'].replace('kbits/s', ''))
+    progress = {
+        **default,
+        **items,
+    }
 
     return Progress(
-        frame=int(items['frame']),
-        fps=float(items['fps']),
-        size=size,
-        time=items['time'],
-        bitrate=bitrate,
-        speed=float(items['speed'].replace('x', '')),
+        frame=int(progress['frame']),
+        fps=float(progress['fps']),
+        size=int(progress['size'].replace('kB', '')) * 1024,
+        time=progress['time'],
+        bitrate=float(progress['bitrate'].replace('kbits/s', '')),
+        speed=float(progress['speed'].replace('x', '')),
     )
