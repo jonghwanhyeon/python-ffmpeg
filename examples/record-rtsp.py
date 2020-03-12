@@ -10,14 +10,6 @@ ffmpeg = FFmpeg().option('y').input(
     vcodec='copy',
 )
 
-ffmpeg = FFmpeg().option('y').input('input.mp4').output(
-    'ouptut.mp4',
-    { 'c:v': 'libx264' },
-    vf='scale=1280:-1',
-    preset='veryslow',
-    crf=24
-)
-
 @ffmpeg.on('start')
 def on_start(arguments):
     print('arguments:', arguments)

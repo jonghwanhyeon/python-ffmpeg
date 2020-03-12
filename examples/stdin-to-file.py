@@ -39,7 +39,7 @@ async def main():
     streamlink = await asyncio.create_subprocess_exec(
         'streamlink',
         '--stdout',
-        'https://www.twitch.tv/ninja',
+        'https://www.twitch.tv/hanryang1125',
         'best',
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.DEVNULL
