@@ -16,9 +16,12 @@ def build_options(options):
         if key.startswith('-'):
             key = key[1:]
 
-        argument = ['-{key}'.format(key=key)]
-        if value is not None:
-            argument.append(str(value))
+        if isinstance(value, collections.abc.Sequence) and not isinstance(value, (str, bytearray, bytes)):
+            argument = [a for i in value for a in (f"-{key}", i)]
+        else:
+            argument = ['-{key}'.format(key=key)]
+            if value is not None:
+                argument.append(str(value))
 
         arguments.extend(argument)
 
