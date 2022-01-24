@@ -74,9 +74,9 @@ class FFmpeg(EventEmitter):
 
         self._executed = True
         await asyncio.wait([
-            self._write_stdin(stream),
-            self._read_stderr(),
-            self._process.wait(),
+            asyncio.create_task(self._write_stdin(stream)),
+            asyncio.create_task(self._read_stderr()),
+            asyncio.create_task(self._process.wait()),
         ])
 
         if self._process.returncode == 0:
