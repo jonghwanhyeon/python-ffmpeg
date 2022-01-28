@@ -1,17 +1,22 @@
+from __future__ import annotations
+
 import asyncio
 import os
 import signal
 import sys
-
+from codecs import StreamReader
 from collections import namedtuple
+from typing import Dict, List, Optional
+
 from pyee import EventEmitter
 
+from .typing import Option
 from .utils import build_options, parse_progress, readlines
 
 _windows = (sys.platform == 'win32')
 
 
-def _create_subprocess(*args, **kwargs):
+def _create_subprocess(*args, **kwargs) -> asyncio.subprocess.Process:
     if _windows:
         # https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.asyncio.subprocess.Process.send_signal
         from subprocess import CREATE_NEW_PROCESS_GROUP
@@ -27,7 +32,7 @@ class FFmpegError(Exception):
 class FFmpeg(EventEmitter):
     _File = namedtuple('_File', ['url', 'options'])
 
-    def __init__(self, executable='ffmpeg'):
+    def __init__(self, executable: str = 'ffmpeg'):
         super().__init__()
 
         self._executable = executable
@@ -41,25 +46,31 @@ class FFmpeg(EventEmitter):
 
         self.on('stderr', self._on_stderr)
 
-    def option(self, key, value=None):
+    def option(self,
+               key: str,
+               value: Optional[Option] = None) -> FFmpeg:
         self._global_options[key] = value
         return self
 
-    def input(self, url, options=None, **kwargs):
+    def input(self,
+              url: str,
+              options: Optional[Dict[str, Option]] = None, **kwargs) -> FFmpeg:
         if options is None:
             options = {}
 
         self._input_files.append(FFmpeg._File(url=url, options={**options, **kwargs}))
         return self
 
-    def output(self, url, options=None, **kwargs):
+    def output(self,
+               url: str,
+               options: Optional[Dict[str, Option]] = None, **kwargs) -> FFmpeg:
         if options is None:
             options = {}
 
         self._output_files.append(FFmpeg._File(url=url, options={**options, **kwargs}))
         return self
 
-    async def execute(self, stream=None):
+    async def execute(self, stream: Optional[asyncio.StreamReader] = None):
         if self._executed:
             raise FFmpegError('FFmpeg is already executed')
 
@@ -98,7 +109,7 @@ class FFmpeg(EventEmitter):
         self._terminated = True
         self._process.send_signal(sigterm)
 
-    async def _write_stdin(self, stream):
+    async def _write_stdin(self, stream: Optional[StreamReader]):
         if not stream:
             return
 
@@ -110,12 +121,12 @@ class FFmpeg(EventEmitter):
         async for line in readlines(self._process.stderr):
             self.emit('stderr', line.decode('utf-8'))
 
-    def _on_stderr(self, line):  # registered in __init__()
+    def _on_stderr(self, line: str):  # registered in __init__()
         progress = parse_progress(line)
         if progress:
             self.emit('progress', progress)
 
-    def _build(self):
+    def _build(self) -> List[str]:
         arguments = [self._executable]
         arguments.extend(build_options(self._global_options))
 

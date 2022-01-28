@@ -1,5 +1,9 @@
+import asyncio
 import collections
 import re
+from typing import Dict, List
+
+from .typing import Option
 
 Progress = collections.namedtuple('Progress', [
     'frame', 'fps', 'size', 'time', 'bitrate', 'speed'
@@ -9,7 +13,7 @@ progress_pattern = re.compile(
     r'(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)'
 )
 
-def build_options(options):
+def build_options(options: Dict[str, Option]) -> List[str]:
     arguments = []
 
     for key, value in options.items():
@@ -25,7 +29,7 @@ def build_options(options):
     return arguments
 
 
-async def readlines(stream):
+async def readlines(stream: asyncio.StreamReader):
     pattern = re.compile(br'[\r\n]+')
 
     data = bytearray()
@@ -40,7 +44,7 @@ async def readlines(stream):
 
 
 # Reference: https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg.c#L1646
-def parse_progress(line):
+def parse_progress(line: str) -> Progress:
     default = {
         'frame': '0',
         'fps': '0.0',
