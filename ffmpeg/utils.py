@@ -13,21 +13,25 @@ progress_pattern = re.compile(
     r'(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)'
 )
 
+def build_option(key: str, value: Option) -> List[str]:
+    if key.startswith('-'):
+        key = key[1:]
+
+    option = [f'-{key}']
+    if value is not None:
+        option.append(str(value))
+
+    return option
+
 def build_options(options: Dict[str, Option]) -> List[str]:
     arguments = []
 
-    for key, value in options.items():
-        if key.startswith('-'):
-            key = key[1:]
+    for key, values in options.items():
+        if not isinstance(values, (list, set, tuple)):
+            values = [values]
 
-        if isinstance(value, collections.abc.Sequence) and not isinstance(value, (str, bytearray, bytes)):
-            argument = [a for i in value for a in (f"-{key}", i)]
-        else:
-            argument = ['-{key}'.format(key=key)]
-            if value is not None:
-                argument.append(str(value))
-
-        arguments.extend(argument)
+        for value in values:
+            arguments.extend(build_option(key, value))
 
     return arguments
 
