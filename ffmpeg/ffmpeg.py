@@ -33,7 +33,6 @@ class FFmpeg(EventEmitter):
         self._executable = executable
         self._global_options = {}
         self._input_files = []
-        self._mappings = []
         self._output_files = []
 
         self._executed = False
@@ -51,10 +50,6 @@ class FFmpeg(EventEmitter):
             options = {}
 
         self._input_files.append(FFmpeg._File(url=url, options={**options, **kwargs}))
-        return self
-
-    def map(self, value):
-        self._mappings.append(value)
         return self
 
     def output(self, url, options=None, **kwargs):
@@ -127,9 +122,6 @@ class FFmpeg(EventEmitter):
         for file in self._input_files:
             arguments.extend(build_options(file.options))
             arguments.extend(['-i', file.url])
-
-        for mapping in self._mappings:
-            arguments.extend(build_options({'map': mapping}))
 
         for file in self._output_files:
             arguments.extend(build_options(file.options))
