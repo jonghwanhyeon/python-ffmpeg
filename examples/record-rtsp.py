@@ -1,14 +1,14 @@
 import asyncio
 from ffmpeg import FFmpeg
 
-ffmpeg = FFmpeg().option('y').input(
-    'rtsp://127.0.0.1/cam',
-    rtsp_transport='tcp',
-    rtsp_flags='prefer_tcp'
-).output(
-    'otuput.mp4',
-    vcodec='copy',
-)
+ffmpeg = (FFmpeg()
+            .option('y')
+            .input('rtsp://127.0.0.1/cam',
+                   rtsp_transport='tcp',
+                   rtsp_flags='prefer_tcp')
+            .output('otuput.mp4',
+                    vcodec='copy'))
+
 
 @ffmpeg.on('start')
 def on_start(arguments):

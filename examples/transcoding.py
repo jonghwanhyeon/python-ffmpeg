@@ -1,13 +1,15 @@
 import asyncio
 from ffmpeg import FFmpeg
 
-ffmpeg = FFmpeg().option('y').input('input.mp4').output(
-    'ouptut.mp4',
-    { 'c:v': 'libx264' },
-    vf='scale=1280:-1',
-    preset='veryslow',
-    crf=24
-)
+ffmpeg = (FFmpeg()
+            .option('y')
+            .input('input.mp4')
+            .output('ouptut.mp4',
+                    {'c:v': 'libx264'},
+                    vf='scale=1280:-1',
+                    preset='veryslow',
+                    crf=24))
+
 
 @ffmpeg.on('start')
 def on_start(arguments):
@@ -22,6 +24,7 @@ def on_stderr(line):
 @ffmpeg.on('progress')
 def on_progress(progress):
     print(progress)
+
 
 @ffmpeg.on('completed')
 def on_completed():

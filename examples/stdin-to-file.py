@@ -1,10 +1,12 @@
 import asyncio
 from ffmpeg import FFmpeg
 
-ffmpeg = FFmpeg().option('y').input('pipe:0').output(
-    'ouptut.mp4',
-    c='copy'
-)
+ffmpeg = (FFmpeg()
+            .option('y')
+            .input('pipe:0')
+            .output('otuput.mp4',
+                    c='copy'))
+
 
 @ffmpeg.on('start')
 def on_start(arguments):
@@ -19,6 +21,7 @@ def on_stderr(line):
 @ffmpeg.on('progress')
 def on_progress(progress):
     print(progress)
+
 
 @ffmpeg.on('completed')
 def on_completed():
@@ -39,7 +42,7 @@ async def main():
     streamlink = await asyncio.create_subprocess_exec(
         'streamlink',
         '--stdout',
-        'https://www.twitch.tv/hanryang1125',
+        'https://twitch.tv/zilioner',
         'best',
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.DEVNULL
