@@ -79,7 +79,7 @@ class FFmpeg(EventEmitter):
 
         self._process = await _create_subprocess(
             *arguments,
-            stdin=asyncio.subprocess.PIPE if stream else None,
+            stdin=asyncio.subprocess.PIPE if stream is not None else None,
             stderr=asyncio.subprocess.PIPE,
         )
 
@@ -110,7 +110,7 @@ class FFmpeg(EventEmitter):
         self._process.send_signal(sigterm)
 
     async def _write_stdin(self, stream: Optional[StreamReader]):
-        if not stream:
+        if stream is None:
             return
 
         while not stream.at_eof():
