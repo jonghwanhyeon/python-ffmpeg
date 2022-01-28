@@ -46,6 +46,4 @@ def on_error(code):
     print('error:', code)
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(ffmpeg.execute())
-loop.close()
+asyncio.run(ffmpeg.execute())

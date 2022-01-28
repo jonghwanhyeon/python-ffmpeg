@@ -4,7 +4,7 @@
 A python interface for FFmpeg using asyncio
 
 ## Requirements
-- Python 3.5+
+- Python 3.7+
 - pyee
 
 ## Installation
@@ -57,9 +57,7 @@ def on_terminated():
 def on_error(code):
     print('Error:', code)
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(ffmpeg.execute())
-loop.close()
+asyncio.run(ffmpeg.execute())
 ```
 ## API
 ### FFmpeg
