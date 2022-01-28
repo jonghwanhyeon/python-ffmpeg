@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import List, Union
+from typing import Iterable, Union
 
 OptionItem = Union[str, Number]
-Option = Union[OptionItem, List[OptionItem]]
+Option = Union[OptionItem, Iterable[OptionItem]]
