@@ -109,6 +109,11 @@ class FFmpeg(EventEmitter):
         self._terminated = True
         self._process.send_signal(sigterm)
 
+    async def drain(self):
+        # Memory leak occurs when too much data is feed to StreamReader (stream)
+        # So expose StreamWriter's (stdin) drain to be called to create back pressure
+        return await self._process.stdin.drain()
+
     async def _write_stdin(self, stream: Optional[StreamReader]):
         if stream is None:
             return
