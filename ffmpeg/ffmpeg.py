@@ -32,7 +32,7 @@ class FFmpegError(Exception):
 class FFmpeg(EventEmitter):
     _File = namedtuple('_File', ['url', 'options'])
 
-    def __init__(self, executable: str = 'ffmpeg'):
+    def __init__(self, executable: str = 'ffmpeg', skip_default_drain: bool = False):
         super().__init__()
 
         self._executable = executable
@@ -43,6 +43,7 @@ class FFmpeg(EventEmitter):
         self._executed = False
         self._terminated = False
         self._process = None
+        self.skip_default_drain = skip_default_drain
 
         self.on('stderr', self._on_stderr)
 
@@ -109,12 +110,19 @@ class FFmpeg(EventEmitter):
         self._terminated = True
         self._process.send_signal(sigterm)
 
+    async def drain(self):
+        # Memory leak occurs when too much data is feed to StreamReader (stream)
+        # So expose StreamWriter's (stdin) drain to be called to create back pressure
+        return await self._process.stdin.drain()
+
     async def _write_stdin(self, stream: Optional[StreamReader]):
         if stream is None:
             return
 
         while not stream.at_eof():
             self._process.stdin.write(await stream.read(1024))
+            if not self.skip_default_drain:
+                await self._process.stdin.drain()
         self._process.stdin.write_eof()
 
     async def _read_stderr(self):
