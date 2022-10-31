@@ -43,7 +43,7 @@ class FFmpeg(EventEmitter):
         self._executed = False
         self._terminated = False
         self._process = None
-        self.skip_default_drain = skip_default_drain
+        self._skip_default_drain = skip_default_drain
 
         self.on('stderr', self._on_stderr)
 
@@ -121,7 +121,7 @@ class FFmpeg(EventEmitter):
 
         while not stream.at_eof():
             self._process.stdin.write(await stream.read(1024))
-            if not self.skip_default_drain:
+            if not self._skip_default_drain:
                 await self._process.stdin.drain()
         self._process.stdin.write_eof()
 
