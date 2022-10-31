@@ -5,7 +5,7 @@ with open('README.md', 'r') as input_file:
 
 setup(
     name='python-ffmpeg',
-    version='1.0.14',
+    version='1.0.15',
     description='A python interface for FFmpeg using asyncio',
     long_description=long_description,
     long_description_content_type='text/markdown',
