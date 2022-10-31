@@ -5,8 +5,8 @@ with open('README.md', 'r') as input_file:
 
 setup(
     name='python-ffmpeg',
-    version='1.0.13',
-    description='A python interface for FFmpeg',
+    version='1.0.14',
+    description='A python interface for FFmpeg using asyncio',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/jonghwanhyeon/python-ffmpeg',
@@ -17,7 +17,6 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only'
     ],
     keywords='ffmpeg',
