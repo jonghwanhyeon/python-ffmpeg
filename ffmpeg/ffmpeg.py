@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import signal
 import sys
 from codecs import StreamReader
@@ -109,7 +108,7 @@ class FFmpeg(EventEmitter):
 
     async def drain(self):
         # Memory leak occurs when too much data is feed to StreamReader (stream)
-        # So expose StreamWriter's (stdin) drain to be called to create back pressure
+        # So expe StreamWriter's (stdin) drain to be called to create back pressure
         return await self._process.stdin.drain()
 
     async def _write_stdin(self, stream: Optional[StreamReader]):
