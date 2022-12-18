@@ -4,13 +4,7 @@ from ffmpeg import FFmpeg
 
 
 async def main():
-    ffmpeg = (
-        FFmpeg()
-        .option("y")
-        .input("input-a.mp4")
-        .input("input-b.mp4")
-        .output("output.mp4", map=["0:0", "1:1"])
-    )
+    ffmpeg = FFmpeg().option("y").input("input-a.mp4").input("input-b.mp4").output("output.mp4", map=["0:0", "1:1"])
 
     @ffmpeg.on("start")
     def on_start(arguments):

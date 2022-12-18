@@ -5,23 +5,21 @@ from typing import Dict, List
 
 from .typing import Option
 
-Progress = collections.namedtuple('Progress', [
-    'frame', 'fps', 'size', 'time', 'bitrate', 'speed'
-])
+Progress = collections.namedtuple("Progress", ["frame", "fps", "size", "time", "bitrate", "speed"])
 
-progress_pattern = re.compile(
-    r'(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)'
-)
+progress_pattern = re.compile(r"(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)")
+
 
 def build_option(key: str, value: Option) -> List[str]:
-    if key.startswith('-'):
+    if key.startswith("-"):
         key = key[1:]
 
-    option = [f'-{key}']
+    option = [f"-{key}"]
     if value is not None:
         option.append(str(value))
 
     return option
+
 
 def build_options(options: Dict[str, Option]) -> List[str]:
     arguments = []
@@ -37,7 +35,7 @@ def build_options(options: Dict[str, Option]) -> List[str]:
 
 
 async def readlines(stream: asyncio.StreamReader):
-    pattern = re.compile(br'[\r\n]+')
+    pattern = re.compile(rb"[\r\n]+")
 
     data = bytearray()
     while not stream.at_eof():
@@ -53,17 +51,15 @@ async def readlines(stream: asyncio.StreamReader):
 # Reference: https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg.c#L1646
 def parse_progress(line: str) -> Progress:
     default = {
-        'frame': '0',
-        'fps': '0.0',
-        'size': '0kB',
-        'time': '00:00:00.00',
-        'bitrate': '0.0kbits/s',
-        'speed': '0.0x',
+        "frame": "0",
+        "fps": "0.0",
+        "size": "0kB",
+        "time": "00:00:00.00",
+        "bitrate": "0.0kbits/s",
+        "speed": "0.0x",
     }
 
-    items = {
-        key: value for key, value in progress_pattern.findall(line) if value != 'N/A'
-    }
+    items = {key: value for key, value in progress_pattern.findall(line) if value != "N/A"}
 
     if not items:
         return None
@@ -74,10 +70,10 @@ def parse_progress(line: str) -> Progress:
     }
 
     return Progress(
-        frame=int(progress['frame']),
-        fps=float(progress['fps']),
-        size=int(progress['size'].replace('kB', '')) * 1024,
-        time=progress['time'],
-        bitrate=float(progress['bitrate'].replace('kbits/s', '')),
-        speed=float(progress['speed'].replace('x', '')),
+        frame=int(progress["frame"]),
+        fps=float(progress["fps"]),
+        size=int(progress["size"].replace("kB", "")) * 1024,
+        time=progress["time"],
+        bitrate=float(progress["bitrate"].replace("kbits/s", "")),
+        speed=float(progress["speed"].replace("x", "")),
     )
