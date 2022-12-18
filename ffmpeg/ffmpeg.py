@@ -9,8 +9,8 @@ from typing import Dict, List, Optional
 
 from pyee import EventEmitter
 
-from .typing import Option
-from .utils import build_options, parse_progress, readlines
+from ffmpeg.typing import Option
+from ffmpeg.utils import build_options, parse_progress, readlines
 
 _windows = sys.platform == "win32"
 

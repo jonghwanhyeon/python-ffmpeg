@@ -3,7 +3,7 @@ import collections
 import re
 from typing import Dict, List
 
-from .typing import Option
+from ffmpeg.typing import Option
 
 Progress = collections.namedtuple("Progress", ["frame", "fps", "size", "time", "bitrate", "speed"])
 
