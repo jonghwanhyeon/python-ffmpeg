@@ -7,8 +7,12 @@ def main():
     ffmpeg = (
         FFmpeg()
         .option("y")
-        .input("rtsp://username:password@127.0.0.1/cam", rtsp_transport="tcp", rtsp_flags="prefer_tcp")
-        .output("output.mp4", vcodec="copy")
+        .input("input-a.mp4")
+        .input("input-b.mp4")
+        .output(
+            "output.mp4",
+            map=["0:0", "1:1"],
+        )
     )
 
     @ffmpeg.on("start")
@@ -18,11 +22,6 @@ def main():
     @ffmpeg.on("progress")
     def on_progress(progress: Progress):
         print(progress)
-
-    @ffmpeg.on("progress")
-    def time_to_terminate(progress: Progress):
-        if progress.frame > 200:
-            ffmpeg.terminate()
 
     ffmpeg.execute()
 

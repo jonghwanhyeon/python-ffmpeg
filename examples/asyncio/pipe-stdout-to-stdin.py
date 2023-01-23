@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import asyncio
 
-from ffmpeg import FFmpeg
+from ffmpeg import Progress
+from ffmpeg.asyncio import FFmpeg
 
 
 async def main():
@@ -13,31 +16,15 @@ async def main():
         stderr=asyncio.subprocess.DEVNULL,
     )
 
-    ffmpeg = FFmpeg().option("y").input("pipe:0").output("otuput.mp4", c="copy")
+    ffmpeg = FFmpeg().option("y").input("pipe:0").output("output.mp4", c="copy")
 
     @ffmpeg.on("start")
-    def on_start(arguments):
+    def on_start(arguments: list[str]):
         print("arguments:", arguments)
 
-    @ffmpeg.on("stderr")
-    def on_stderr(line):
-        print("stderr:", line)
-
     @ffmpeg.on("progress")
-    def on_progress(progress):
+    def on_progress(progress: Progress):
         print(progress)
-
-    @ffmpeg.on("completed")
-    def on_completed():
-        print("completed")
-
-    @ffmpeg.on("terminated")
-    def on_terminated():
-        print("terminated")
-
-    @ffmpeg.on("error")
-    def on_error(code):
-        print("error:", code)
 
     await ffmpeg.execute(streamlink.stdout)
 

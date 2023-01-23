@@ -1,13 +1,20 @@
 from __future__ import annotations
 
-from ffmpeg import FFmpeg, Progress
+import asyncio
+
+from ffmpeg import Progress
+from ffmpeg.asyncio import FFmpeg
 
 
-def main():
+async def main():
     ffmpeg = (
         FFmpeg()
         .option("y")
-        .input("rtsp://username:password@127.0.0.1/cam", rtsp_transport="tcp", rtsp_flags="prefer_tcp")
+        .input(
+            "rtsp://username@password:127.0.0.1/cam",
+            rtsp_transport="tcp",
+            rtsp_flags="prefer_tcp",
+        )
         .output("output.mp4", vcodec="copy")
     )
 
@@ -24,8 +31,8 @@ def main():
         if progress.frame > 200:
             ffmpeg.terminate()
 
-    ffmpeg.execute()
+    await ffmpeg.execute()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
