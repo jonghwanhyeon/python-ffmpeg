@@ -1,1 +1,2 @@
 pyee
+typing_extensions

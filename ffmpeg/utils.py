@@ -1,79 +1,56 @@
-import asyncio
-import collections
+from __future__ import annotations
+
+import io
 import re
-from typing import Dict, List
+import subprocess
+import sys
+from collections.abc import Iterable
+from typing import IO, Any
 
-from ffmpeg.typing import Option
-
-Progress = collections.namedtuple("Progress", ["frame", "fps", "size", "time", "bitrate", "speed"])
-
-progress_pattern = re.compile(r"(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)")
-
-
-def build_option(key: str, value: Option) -> List[str]:
-    if key.startswith("-"):
-        key = key[1:]
-
-    option = [f"-{key}"]
-    if value is not None:
-        option.append(str(value))
-
-    return option
+from ffmpeg import types
 
 
-def build_options(options: Dict[str, Option]) -> List[str]:
-    arguments = []
-
-    for key, values in options.items():
-        if not isinstance(values, (list, set, tuple)):
-            values = [values]
-
-        for value in values:
-            arguments.extend(build_option(key, value))
-
-    return arguments
+def is_windows() -> bool:
+    return sys.platform == "win32"
 
 
-async def readlines(stream: asyncio.StreamReader):
+def create_subprocess(*args: Any, **kwargs: Any) -> subprocess.Popen:
+    # On Windows, CREATE_NEW_PROCESS_GROUP flag is required to use CTRL_BREAK_EVENT signal,
+    # which is required to gracefully terminate the FFmpeg process.
+    # Reference: https://docs.python.org/3/library/subprocess.html#subprocess.Popen.send_signal
+    if is_windows():
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore
+
+    return subprocess.Popen(*args, **kwargs)
+
+
+def ensure_io(stream: types.Stream) -> IO[bytes]:
+    if isinstance(stream, bytes):
+        stream = io.BytesIO(stream)
+
+    return stream
+
+
+def read_stream(stream: IO[bytes], size: int = -1) -> Iterable[bytes]:
+    while True:
+        chunk = stream.read(size)
+        if not chunk:
+            break
+
+        yield chunk
+
+
+def readlines(stream: IO[bytes]) -> Iterable[bytes]:
     pattern = re.compile(rb"[\r\n]+")
 
-    data = bytearray()
-    while not stream.at_eof():
-        lines = pattern.split(data)
-        data[:] = lines.pop(-1)
+    buffer = bytearray()
+    for chunk in read_stream(stream, io.DEFAULT_BUFFER_SIZE):
+        buffer.extend(chunk)
 
-        for line in lines:
-            yield line
+        lines = pattern.split(buffer)
+        buffer[:] = lines.pop(-1)  # keep the last line that could be partial
 
-        data.extend(await stream.read(1024))
+        yield from lines
 
-
-# Reference: https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg.c#L1646
-def parse_progress(line: str) -> Progress:
-    default = {
-        "frame": "0",
-        "fps": "0.0",
-        "size": "0kB",
-        "time": "00:00:00.00",
-        "bitrate": "0.0kbits/s",
-        "speed": "0.0x",
-    }
-
-    items = {key: value for key, value in progress_pattern.findall(line) if value != "N/A"}
-
-    if not items:
-        return None
-
-    progress = {
-        **default,
-        **items,
-    }
-
-    return Progress(
-        frame=int(progress["frame"]),
-        fps=float(progress["fps"]),
-        size=int(progress["size"].replace("kB", "")) * 1024,
-        time=progress["time"],
-        bitrate=float(progress["bitrate"].replace("kbits/s", "")),
-        speed=float(progress["speed"].replace("x", "")),
-    )
+    if buffer:
+        yield bytes(buffer)

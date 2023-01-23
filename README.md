@@ -1,7 +1,5 @@
-
-
 # python-ffmpeg
-A python interface for FFmpeg using asyncio
+A python binding for FFmpeg which provides sync and async APIs
 
 ## Requirements
 - Python 3.7+
