@@ -1,0 +1,11 @@
+@media screen and (min-width: 60em) {
+  .md-header__source {
+    max-width: 14rem;
+    width: 14rem;
+  }
+}
+
+.highlight .gp,
+.highlight .go {
+  user-select: none;
+}

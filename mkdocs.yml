@@ -1,0 +1,53 @@
+site_name: python-ffmpeg
+site_description: A python binding for FFmpeg which provides sync and async APIs
+site_author: Jonghwan Hyeon
+
+repo_url: https://github.com/jonghwanhyeon/python-ffmpeg
+repo_name: jonghwanhyeon/python-ffmpeg
+
+nav:
+  - Overview: index.md
+  - Examples:
+    - examples/transcoding.md
+    - examples/recording.md
+    - examples/mapping.md
+    - examples/using-output-to-stdout.md
+    - examples/feeding-data-to-stdin.md
+    - examples/monitoring-status.md
+  - api.md
+
+theme:
+  name: material
+  icon:
+    logo: fontawesome/solid/video
+    repo: fontawesome/brands/github
+  features:
+    - content.code.annotate
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_toc_entry: false
+            members_order: source
+            group_by_category: false
+            show_bases: true
+            show_source: false
+
+watch:
+  - ffmpeg
