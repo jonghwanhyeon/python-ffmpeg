@@ -5,9 +5,22 @@ import re
 import subprocess
 import sys
 from collections.abc import Iterable
+from datetime import timedelta
 from typing import IO, Any
 
 from ffmpeg import types
+
+
+def parse_time(time: str) -> timedelta:
+    match = re.search(r"(-?\d+):(\d+):(\d+)\.(\d+)", time)
+    assert match is not None
+
+    return timedelta(
+        hours=int(match.group(1)),
+        minutes=int(match.group(2)),
+        seconds=int(match.group(3)),
+        milliseconds=int(match.group(4)) * 10,
+    )
 
 
 def is_windows() -> bool:

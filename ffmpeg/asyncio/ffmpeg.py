@@ -14,7 +14,7 @@ from ffmpeg import types
 from ffmpeg.asyncio.utils import create_subprocess, ensure_stream_reader, read_stream, readlines
 from ffmpeg.ffmpeg import FFmpegError
 from ffmpeg.options import Options
-from ffmpeg.progress import Progress
+from ffmpeg.progress import Tracker
 from ffmpeg.utils import is_windows
 
 
@@ -34,7 +34,7 @@ class FFmpeg(EventEmitter):
         self._executed: bool = False
         self._terminated: bool = False
 
-        self.on("stderr", self._on_stderr)
+        self._tracker = Tracker(self)  # type: ignore
 
     def option(self, key: str, value: Optional[types.Option] = None) -> Self:
         """Add a global option `-key` or `-key value`.
@@ -190,8 +190,3 @@ class FFmpeg(EventEmitter):
 
         async for line in readlines(self._process.stderr):
             self.emit("stderr", line.decode())
-
-    def _on_stderr(self, line: str):  # registered in __init__()
-        progress = Progress.from_line(line)
-        if progress is not None:
-            self.emit("progress", progress)

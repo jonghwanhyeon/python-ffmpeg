@@ -12,7 +12,7 @@ from typing_extensions import Self
 
 from ffmpeg import types
 from ffmpeg.options import Options
-from ffmpeg.progress import Progress
+from ffmpeg.progress import Tracker
 from ffmpeg.utils import create_subprocess, ensure_io, is_windows, read_stream, readlines
 
 
@@ -36,7 +36,7 @@ class FFmpeg(EventEmitter):
         self._executed: bool = False
         self._terminated: bool = False
 
-        self.on("stderr", self._on_stderr)
+        self._tracker = Tracker(self)  # type: ignore
 
     def option(self, key: str, value: Optional[types.Option] = None) -> Self:
         """Add a global option `-key` or `-key value`.
@@ -201,8 +201,3 @@ class FFmpeg(EventEmitter):
             self.emit("stderr", line.decode())
 
         self._process.stderr.close()
-
-    def _on_stderr(self, line: str):  # registered in __init__()
-        progress = Progress.from_line(line)
-        if progress is not None:
-            self.emit("progress", progress)
