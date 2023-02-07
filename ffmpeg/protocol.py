@@ -39,7 +39,7 @@ class FFmpegProtocol(Protocol):
         ...
 
     @overload
-    def execute(
+    async def execute(
         self,
         stream: Optional[types.AsyncStream] = None,
     ) -> bytes:
