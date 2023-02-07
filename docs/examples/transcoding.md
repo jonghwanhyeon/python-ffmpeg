@@ -1,6 +1,6 @@
 # Transcoding
 
-You can use **python-ffmpeg** to transcode an input file into various codecs, formats.
+You can use **python-ffmpeg** to transcode an input file into various codecs and formats.
 
 For example, you can change the container of a video file without re-encoding the content as follows:
 
