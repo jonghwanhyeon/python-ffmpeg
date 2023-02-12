@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable
-from typing import IO, Any, Callable, TypeVar, Union
+from typing import IO, Any, Callable, Iterable, TypeVar, Union
 
 Numeric = Union[int, float]
 
