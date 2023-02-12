@@ -95,8 +95,7 @@ class FFmpeg(EventEmitter):
     
     def cmdline(self, args):
         args = args.replace("\\\n"," ")
-        import shlex
-        args = [self._executable]+shlex.split(args)
+        args = shlex.split(args)
         self._str_args = args
         return self
 
@@ -123,8 +122,8 @@ class FFmpeg(EventEmitter):
             stream = ensure_io(stream)
 
 
-        if self.str_args is not None:
-            arguments = [self._executable, self._str_args]
+        if self._str_args is not None:
+            arguments = [self._executable, *self._str_args]
         else:
             arguments = [self._executable, *self._options.build()]
         
