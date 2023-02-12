@@ -3,6 +3,7 @@ from __future__ import annotations
 import concurrent.futures
 import io
 import os
+import shlex
 import signal
 import subprocess
 from typing import IO, Optional, Union
@@ -31,6 +32,7 @@ class FFmpeg(EventEmitter):
 
         self._executable: str = executable
         self._options: Options = Options()
+        self._str_args = None # use args generated from string with cmdline function
 
         self._process: subprocess.Popen[bytes]
         self._executed: bool = False
@@ -90,6 +92,13 @@ class FFmpeg(EventEmitter):
         """
         self._options.output(url, options, **kwargs)
         return self
+    
+    def cmdline(self, args):
+        args = args.replace("\\\n"," ")
+        import shlex
+        args = [self._executable]+shlex.split(args)
+        self._str_args = args
+        return self
 
     def execute(self, stream: Optional[types.Stream] = None) -> bytes:
         """Execute FFmpeg using specified global options and files.
@@ -113,7 +122,12 @@ class FFmpeg(EventEmitter):
         if stream is not None:
             stream = ensure_io(stream)
 
-        arguments = [self._executable, *self._options.build()]
+
+        if self.str_args is not None:
+            arguments = [self._executable, self._str_args]
+        else:
+            arguments = [self._executable, *self._options.build()]
+        
         self.emit("start", arguments)
 
         self._process = create_subprocess(
