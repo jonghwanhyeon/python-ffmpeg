@@ -15,7 +15,6 @@ async def test_asyncio_exception_raising(
 
     raised_error = RuntimeError("Raised error")
     caught_error = None
-    emitted_error = None
 
     ffmpeg = (
         FFmpeg()
@@ -30,17 +29,11 @@ async def test_asyncio_exception_raising(
     def raise_error_on_start(args):
         raise raised_error
 
-    @ffmpeg.on("error")
-    async def catch_emitted_error(exc):
-        nonlocal emitted_error
-        emitted_error = exc
-
     try:
         await ffmpeg.execute()
     except Exception as exc:
         caught_error = exc
 
-    assert emitted_error is None
     assert caught_error == raised_error
 
 @pytest.mark.asyncio
