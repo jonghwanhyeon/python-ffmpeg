@@ -1,6 +1,6 @@
-# Asyncronous Listeners
+# Asynchronous Listeners
 
-When using the Asynchrous API, event listeners may be either regular functions or coroutines.
+When using the Asynchronous API, event listeners may be either regular functions or coroutines.
 
 ``` python
 import asyncio
@@ -24,47 +24,10 @@ async def main():
     async def on_progress(progress: Progress):
         await asyncio.sleep(1)
         print(progress)
-    
+
     @ffmpeg.on("completed")
     def on_completed():
         print("Completed")
-
-    await ffmpeg.execute()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-Initialise `FFmpeg` with `emit_errors=True`, and any unhandled exceptions in listeners will be emitted as an `error` event instead of raised.
-
-``` python
-import asyncio
-import logging
-
-from ffmpeg import Progress
-from ffmpeg.asyncio import FFmpeg
-
-
-async def main():
-    ffmpeg = (
-        FFmpeg(emit_errors=True)
-        .option("y")
-        .input("input.mov")
-        .output(
-            "ouptut.mp4",
-            codec="copy",
-        )
-    )
-
-    @ffmpeg.on("progress")
-    async def on_progress(progress: Progress):
-        await asyncio.sleep(1)
-        logging.info(progress)
-    
-    @ffmpeg.on("error")
-    async def log_error(exc):
-        logging.error(f"Something went wrong: {exc}")
 
     await ffmpeg.execute()
 

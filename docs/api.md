@@ -54,12 +54,3 @@ This event is emitted when `FFmpeg` is successfully exited.
 
 ### `terminated`
 This event is emitted when `FFmpeg` is gracefully terminated by calling `FFmpeg.terminate()`.
-
-### `error`
-This event is emitted when an event listener raises an unhandled exception. Asynchronous API only, if `FFmpeg` is initialised with `emit_errors=True`.
-
-**Parameters:**
-
-|   Name  |   Type    |       Description       |
-|---------|-----------|-------------------------|
-| `error` | Exception | The unhandled Exception |

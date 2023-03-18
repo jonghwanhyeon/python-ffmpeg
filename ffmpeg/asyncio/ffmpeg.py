@@ -19,12 +19,11 @@ from ffmpeg.utils import is_windows
 
 
 class FFmpeg(AsyncIOEventEmitter):
-    def __init__(self, executable: str = "ffmpeg", emit_errors: bool = False):
+    def __init__(self, executable: str = "ffmpeg"):
         """Initialize an `FFmpeg` instance using `asyncio`
 
         Args:
             executable: The path to the ffmpeg executable. Defaults to "ffmpeg".
-            emit_errors: Flag to control if unhandled exceptions in listeners should be emitted as "error" events. Defaults to False. 
         """
         super().__init__()
 
@@ -37,8 +36,7 @@ class FFmpeg(AsyncIOEventEmitter):
 
         self._tracker = Tracker(self)  # type: ignore
 
-        if not emit_errors:
-            self.once("error", self._reraise_error)
+        self.once("error", self._reraise_exception)
 
     def option(self, key: str, value: Optional[types.Option] = None) -> Self:
         """Add a global option `-key` or `-key value`.
@@ -194,6 +192,6 @@ class FFmpeg(AsyncIOEventEmitter):
 
         async for line in readlines(self._process.stderr):
             self.emit("stderr", line.decode())
-    
-    def _reraise_error(self, exc):
-        raise exc
+
+    def _reraise_exception(self, exception: Exception):
+        raise exception
