@@ -41,7 +41,7 @@ def test_output_via_stdout(
     tmp_path: Path,
 ):
     source_path = assets_path / "brewing.wav"
-    target_path = tmp_path / "brewing.aac"
+    target_path = tmp_path / "brewing.ogg"
 
     ffmpeg = (
         FFmpeg()
@@ -49,7 +49,7 @@ def test_output_via_stdout(
         .input(source_path)
         .output(
             "pipe:1",
-            f="adts",
+            f="ogg",
         )
     )
     target_bytes = ffmpeg.execute()
@@ -60,4 +60,4 @@ def test_output_via_stdout(
     target = probe(target_path)
 
     assert abs(float(source["format"]["duration"]) - float(target["format"]["duration"])) <= epsilon
-    assert target["format"]["format_name"] == "aac"
+    assert target["format"]["format_name"] == "ogg"

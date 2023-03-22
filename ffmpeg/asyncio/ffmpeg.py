@@ -7,7 +7,7 @@ import signal
 import subprocess
 from typing import Optional, Union
 
-from pyee import EventEmitter
+from pyee.asyncio import AsyncIOEventEmitter
 from typing_extensions import Self
 
 from ffmpeg import types
@@ -18,7 +18,7 @@ from ffmpeg.progress import Tracker
 from ffmpeg.utils import is_windows
 
 
-class FFmpeg(EventEmitter):
+class FFmpeg(AsyncIOEventEmitter):
     def __init__(self, executable: str = "ffmpeg"):
         """Initialize an `FFmpeg` instance using `asyncio`
 
@@ -35,6 +35,8 @@ class FFmpeg(EventEmitter):
         self._terminated: bool = False
 
         self._tracker = Tracker(self)  # type: ignore
+
+        self.once("error", self._reraise_exception)
 
     def option(self, key: str, value: Optional[types.Option] = None) -> Self:
         """Add a global option `-key` or `-key value`.
@@ -190,3 +192,6 @@ class FFmpeg(EventEmitter):
 
         async for line in readlines(self._process.stderr):
             self.emit("stderr", line.decode())
+
+    def _reraise_exception(self, exception: Exception):
+        raise exception
