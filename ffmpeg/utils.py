@@ -4,9 +4,8 @@ import io
 import re
 import subprocess
 import sys
-from collections.abc import Iterable
 from datetime import timedelta
-from typing import IO, Any
+from typing import IO, Any, Iterable
 
 from ffmpeg import types
 
