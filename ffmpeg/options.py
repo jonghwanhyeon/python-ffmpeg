@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Iterable, Optional, Union
 
 from ffmpeg import types
 from ffmpeg.file import InputFile, OutputFile
