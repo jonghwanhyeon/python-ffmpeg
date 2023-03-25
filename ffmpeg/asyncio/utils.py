@@ -2,7 +2,7 @@ import asyncio
 import io
 import re
 import subprocess
-from typing import Any, AsyncIterable, Awaitable, Union
+from typing import Any, AsyncIterable, Awaitable
 
 from ffmpeg import types
 from ffmpeg.utils import is_windows
