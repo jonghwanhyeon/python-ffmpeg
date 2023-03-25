@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import IO, Any, Callable, Iterable, TypeVar, Union
+from typing import IO, Callable, Iterable, TypeVar, Union
 
 Numeric = Union[int, float]
 
@@ -11,4 +11,4 @@ Option = Union[Iterable[T], T]
 Stream = Union[bytes, IO[bytes]]
 AsyncStream = Union[bytes, asyncio.StreamReader]
 
-Handler = TypeVar("Handler", bound=Callable[..., Any])
+Handler = TypeVar("Handler", bound=Callable[..., None])
