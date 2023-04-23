@@ -13,7 +13,7 @@ $ pip install python-ffmpeg
 === "Synchronous API"
 
     ```python
-    from ffmpeg import FFmpeg, Progress
+    from ffmpeg import FFmpeg
 
 
     def main():
@@ -42,7 +42,6 @@ $ pip install python-ffmpeg
     ``` python
     import asyncio
 
-    from ffmpeg import Progress
     from ffmpeg.asyncio import FFmpeg
 
 

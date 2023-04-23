@@ -16,7 +16,7 @@ You can find more examples in [the documentation](https://python-ffmpeg.readthed
 ### Transcoding
 #### Synchronous API
 ```python
-from ffmpeg import FFmpeg, Progress
+from ffmpeg import FFmpeg
 
 
 def main():
@@ -44,7 +44,6 @@ if __name__ == "__main__":
 ``` python
 import asyncio
 
-from ffmpeg import Progress
 from ffmpeg.asyncio import FFmpeg
 
 
