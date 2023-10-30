@@ -202,7 +202,7 @@ class FFmpeg(AsyncIOEventEmitter):
             lines.append(line)
 
         if len(lines) > 0:
-            return lines[0]
+            return lines[-1]
         else:
             return b""
 

@@ -110,7 +110,7 @@ class FFmpeg(EventEmitter):
         if stream is not None:
             stream = ensure_io(stream)
 
-        arguments = [self._executable, "-loglevel", "16", *self._options.build()]
+        arguments = [self._executable, *self._options.build()]
         self.emit("start", arguments)
 
         self._process = create_subprocess(
@@ -208,6 +208,6 @@ class FFmpeg(EventEmitter):
         self._process.stderr.close()
 
         if len(lines) > 0:
-            return lines[0]
+            return lines[-1]
         else:
             return b""
