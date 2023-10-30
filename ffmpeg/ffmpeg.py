@@ -11,13 +11,10 @@ from pyee import EventEmitter
 from typing_extensions import Self
 
 from ffmpeg import types
+from ffmpeg.errors import FFmpegError, FFmpegAlreadyStarted
 from ffmpeg.options import Options
 from ffmpeg.progress import Tracker
 from ffmpeg.utils import create_subprocess, ensure_io, is_windows, read_stream, readlines
-
-
-class FFmpegError(Exception):
-    pass
 
 
 class FFmpeg(EventEmitter):
@@ -98,14 +95,14 @@ class FFmpeg(EventEmitter):
             stream: A stream to input to the standard input. Defaults to None.
 
         Raises:
-            FFmpegError: If FFmpeg is already executed.
+            FFmpegAlreadyStarted: If FFmpeg is already executed.
             FFmpegError: If FFmpeg process returns non-zero exit status.
 
         Returns:
             The output to the standard output.
         """
         if self._executed:
-            raise FFmpegError("FFmpeg is already executed")
+            raise FFmpegAlreadyStarted("FFmpeg is already executed")
 
         self._executed = False
         self._terminated = False
@@ -113,7 +110,7 @@ class FFmpeg(EventEmitter):
         if stream is not None:
             stream = ensure_io(stream)
 
-        arguments = [self._executable, *self._options.build()]
+        arguments = [self._executable, "-loglevel", "16", *self._options.build()]
         self.emit("start", arguments)
 
         self._process = create_subprocess(
@@ -140,6 +137,8 @@ class FFmpeg(EventEmitter):
                     self._process.terminate()
                     raise exception
 
+        _ ,stdout_future, stderr_future, _ = futures
+
         self._executed = False
 
         if self._process.returncode == 0:
@@ -147,9 +146,13 @@ class FFmpeg(EventEmitter):
         elif self._terminated:
             self.emit("terminated")
         else:
-            raise FFmpegError(f"Non-zero exit status {self._process.returncode}")
+            err_msg: bytes = stderr_future.result()
+            raise FFmpegError.create(
+                error_message=err_msg.decode(),
+                command=" ".join(arguments)
+            )
 
-        return futures[1].result()
+        return stdout_future.result()
 
     def terminate(self):
         """Gracefully terminate the running FFmpeg process.
@@ -197,7 +200,14 @@ class FFmpeg(EventEmitter):
     def _handle_stderr(self):
         assert self._process.stderr is not None
 
+        lines = []
         for line in readlines(self._process.stderr):
             self.emit("stderr", line.decode())
+            lines.append(line)
 
         self._process.stderr.close()
+
+        if len(lines) > 0:
+            return lines[0]
+        else:
+            return b""

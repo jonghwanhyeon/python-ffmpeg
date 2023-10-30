@@ -12,7 +12,7 @@ from typing_extensions import Self
 
 from ffmpeg import types
 from ffmpeg.asyncio.utils import create_subprocess, ensure_stream_reader, read_stream, readlines
-from ffmpeg.ffmpeg import FFmpegError
+from ffmpeg.ffmpeg import FFmpegError, FFmpegAlreadyStarted
 from ffmpeg.options import Options
 from ffmpeg.progress import Tracker
 from ffmpeg.utils import is_windows
@@ -98,14 +98,14 @@ class FFmpeg(AsyncIOEventEmitter):
             stream: A stream to input to the standard input. Defaults to None.
 
         Raises:
-            FFmpegError: If FFmpeg is already executed.
+            FFmpegAlreadyStarted: If FFmpeg is already executed.
             FFmpegError: If FFmpeg process returns non-zero exit status.
 
         Returns:
             The output to the standard output.
         """
         if self._executed:
-            raise FFmpegError("FFmpeg is already executed")
+            raise FFmpegAlreadyStarted("FFmpeg is already executed")
 
         self._executed = False
         self._terminated = False
@@ -125,7 +125,7 @@ class FFmpeg(AsyncIOEventEmitter):
 
         self._executed = True
 
-        tasks = [
+        tasks: list[asyncio.Task] = [
             asyncio.create_task(self._write_stdin(stream)),
             asyncio.create_task(self._read_stdout()),
             asyncio.create_task(self._handle_stderr()),
@@ -135,14 +135,20 @@ class FFmpeg(AsyncIOEventEmitter):
 
         self._executed = False
 
+        _ ,stdout_future, stderr_future, _ = tasks
+
         if self._process.returncode == 0:
             self.emit("completed")
         elif self._terminated:
             self.emit("terminated")
         else:
-            raise FFmpegError(f"Non-zero exit status {self._process.returncode}")
+            err_msg: bytes = stderr_future.result()
+            raise FFmpegError.create(
+                error_message=err_msg.decode(),
+                command=" ".join(arguments)
+            )
 
-        return tasks[1].result()
+        return stdout_future.result()
 
     def terminate(self):
         """Gracefully terminate the running FFmpeg process.
@@ -190,8 +196,15 @@ class FFmpeg(AsyncIOEventEmitter):
     async def _handle_stderr(self):
         assert self._process.stderr is not None
 
+        lines = []
         async for line in readlines(self._process.stderr):
             self.emit("stderr", line.decode())
+            lines.append(line)
+
+        if len(lines) > 0:
+            return lines[0]
+        else:
+            return b""
 
     def _reraise_exception(self, exception: Exception):
         raise exception
