@@ -1,4 +1,4 @@
-from .ffmpeg import FFmpeg, FFmpegError
+from .ffmpeg import FFmpeg
 from .progress import Progress
 from .errors import (
     FFmpegError,
