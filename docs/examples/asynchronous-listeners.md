@@ -15,7 +15,7 @@ async def main():
         .option("y")
         .input("input.mov")
         .output(
-            "ouptut.mp4",
+            "output.mp4",
             codec="copy",
         )
     )
