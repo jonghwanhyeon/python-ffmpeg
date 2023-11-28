@@ -16,7 +16,7 @@ For example, you can change the container of a video file without re-encoding th
             .option("y")
             .input("input.mov")
             .output(
-                "ouptut.mp4",
+                "output.mp4",
                 codec="copy",
             )
         )
@@ -47,7 +47,7 @@ For example, you can change the container of a video file without re-encoding th
             .option("y")
             .input("input.mov")
             .output(
-                "ouptut.mp4",
+                "output.mp4",
                 codec="copy",
             )
         )
@@ -77,7 +77,7 @@ You can also scale down the resolution of the video as follows.
             .option("y")
             .input("input.mov")
             .output(
-                "ouptut.mp4",
+                "output.mp4",
                 {"codec:v": "libx264", "filter:v": "scale=1280:-1"},
                 preset="veryslow",
                 crf=24,
@@ -110,7 +110,7 @@ You can also scale down the resolution of the video as follows.
             .option("y")
             .input("input.mov")
             .output(
-                "ouptut.mp4",
+                "output.mp4",
                 {"codec:v": "libx264", "filter:v": "scale=1280:-1"},
                 vf="scale=1280:-1",
                 preset="veryslow",

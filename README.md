@@ -25,7 +25,7 @@ def main():
         .option("y")
         .input("input.mp4")
         .output(
-            "ouptut.mp4",
+            "output.mp4",
             {"codec:v": "libx264"},
             vf="scale=1280:-1",
             preset="veryslow",
@@ -53,7 +53,7 @@ async def main():
         .option("y")
         .input("input.mp4")
         .output(
-            "ouptut.mp4",
+            "output.mp4",
             {"codec:v": "libx264"},
             vf="scale=1280:-1",
             preset="veryslow",
