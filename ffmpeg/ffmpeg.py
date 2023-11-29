@@ -96,7 +96,11 @@ class FFmpeg(EventEmitter):
 
         Raises:
             FFmpegAlreadyExecuted: If FFmpeg is already executed.
-            FFmpegError: If FFmpeg process returns non-zero exit status.
+            FFmpegFileExists: If the output file already exists without using `-y` option.
+            FFmpegFileNotFound: If an input file was not found.
+            FFmpegInvalidCommand: If FFmpeg was passed invalid options or arguments.
+            FFmpegUnsupportedCodec: If FFmpeg attempted to use an unsupported codec.
+            FFmpegError: If the FFmpeg process returns a non-zero exit status, and the error is not the one described above.
 
         Returns:
             The output to the standard output.
