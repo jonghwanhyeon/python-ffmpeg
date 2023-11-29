@@ -22,7 +22,7 @@ $ pip install python-ffmpeg
             .option("y")
             .input("input.mp4")
             .output(
-                "ouptut.mp4",
+                "output.mp4",
                 {"codec:v": "libx264"},
                 vf="scale=1280:-1",
                 preset="veryslow",
@@ -51,7 +51,7 @@ $ pip install python-ffmpeg
             .option("y")
             .input("input.mp4")
             .output(
-                "ouptut.mp4",
+                "output.mp4",
                 {"codec:v": "libx264"},
                 vf="scale=1280:-1",
                 preset="veryslow",
