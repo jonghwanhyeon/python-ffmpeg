@@ -1,0 +1,3 @@
+include tests/assets/*
+include tests/conftest.py
+include tests/helpers.py
