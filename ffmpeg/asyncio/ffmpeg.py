@@ -135,7 +135,7 @@ class FFmpeg(AsyncIOEventEmitter):
 
         self._executed = False
 
-        _ ,stdout_future, stderr_future, _ = tasks
+        _, stdout_future, stderr_future, _ = tasks
 
         if self._process.returncode == 0:
             self.emit("completed")
@@ -143,10 +143,7 @@ class FFmpeg(AsyncIOEventEmitter):
             self.emit("terminated")
         else:
             err_msg: bytes = stderr_future.result()
-            raise FFmpegError.create(
-                error_message=err_msg.decode(),
-                command=" ".join(arguments)
-            )
+            raise FFmpegError.create(error_message=err_msg.decode(), command=" ".join(arguments))
 
         return stdout_future.result()
 
