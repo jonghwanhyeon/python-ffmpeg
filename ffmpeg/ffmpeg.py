@@ -137,7 +137,7 @@ class FFmpeg(EventEmitter):
                     self._process.terminate()
                     raise exception
 
-        _ ,stdout_future, stderr_future, _ = futures
+        _, stdout_future, stderr_future, _ = futures
 
         self._executed = False
 
@@ -147,10 +147,7 @@ class FFmpeg(EventEmitter):
             self.emit("terminated")
         else:
             err_msg: bytes = stderr_future.result()
-            raise FFmpegError.create(
-                error_message=err_msg.decode(),
-                command=" ".join(arguments)
-            )
+            raise FFmpegError.create(error_message=err_msg.decode(), command=" ".join(arguments))
 
         return stdout_future.result()
 

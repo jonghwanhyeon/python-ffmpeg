@@ -2,8 +2,10 @@ from .ffmpeg import FFmpeg
 from .progress import Progress
 from .errors import (
     FFmpegError,
-    FFmpegAlreadyExecuted, FFmpegInvalidCommand,
-    FFmpegFileNotFound, FFmpegFileExists,
+    FFmpegAlreadyExecuted,
+    FFmpegInvalidCommand,
+    FFmpegFileNotFound,
+    FFmpegFileExists,
     FFmpegUnsupportedEncoder,
 )
 
