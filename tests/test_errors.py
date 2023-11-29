@@ -1,6 +1,5 @@
 from pathlib import Path
 import ffmpeg
-from threading import Thread
 import pytest
 
 
