@@ -137,8 +137,6 @@ class FFmpeg(EventEmitter):
                     self._process.terminate()
                     raise exception
 
-        _, stdout_future, stderr_future, _ = futures
-
         self._executed = False
 
         if self._process.returncode == 0:
@@ -146,10 +144,9 @@ class FFmpeg(EventEmitter):
         elif self._terminated:
             self.emit("terminated")
         else:
-            err_msg: bytes = stderr_future.result()
-            raise FFmpegError.create(error_message=err_msg.decode(), command=" ".join(arguments))
+            raise FFmpegError.create(message=futures[2].result(), arguments=arguments)
 
-        return stdout_future.result()
+        return futures[1].result()
 
     def terminate(self):
         """Gracefully terminate the running FFmpeg process.
@@ -194,17 +191,12 @@ class FFmpeg(EventEmitter):
         self._process.stdout.close()
         return bytes(buffer)
 
-    def _handle_stderr(self):
+    def _handle_stderr(self) -> str:
         assert self._process.stderr is not None
 
-        lines = []
+        line = b""
         for line in readlines(self._process.stderr):
             self.emit("stderr", line.decode())
-            lines.append(line)
 
         self._process.stderr.close()
-
-        if len(lines) > 0:
-            return lines[-1]
-        else:
-            return b""
+        return line.decode()
