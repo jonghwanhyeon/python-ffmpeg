@@ -12,7 +12,7 @@ from typing_extensions import Self
 
 from ffmpeg import types
 from ffmpeg.asyncio.utils import create_subprocess, ensure_stream_reader, read_stream, readlines
-from ffmpeg.ffmpeg import FFmpegError, FFmpegAlreadyStarted
+from ffmpeg.ffmpeg import FFmpegAlreadyExecuted, FFmpegError
 from ffmpeg.options import Options
 from ffmpeg.progress import Tracker
 from ffmpeg.utils import is_windows
@@ -98,14 +98,14 @@ class FFmpeg(AsyncIOEventEmitter):
             stream: A stream to input to the standard input. Defaults to None.
 
         Raises:
-            FFmpegAlreadyStarted: If FFmpeg is already executed.
+            FFmpegAlreadyExecuted: If FFmpeg is already executed.
             FFmpegError: If FFmpeg process returns non-zero exit status.
 
         Returns:
             The output to the standard output.
         """
         if self._executed:
-            raise FFmpegAlreadyStarted("FFmpeg is already executed")
+            raise FFmpegAlreadyExecuted("FFmpeg is already executed")
 
         self._executed = False
         self._terminated = False

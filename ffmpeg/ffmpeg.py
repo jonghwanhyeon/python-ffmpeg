@@ -11,7 +11,7 @@ from pyee import EventEmitter
 from typing_extensions import Self
 
 from ffmpeg import types
-from ffmpeg.errors import FFmpegError, FFmpegAlreadyStarted
+from ffmpeg.errors import FFmpegAlreadyExecuted, FFmpegError
 from ffmpeg.options import Options
 from ffmpeg.progress import Tracker
 from ffmpeg.utils import create_subprocess, ensure_io, is_windows, read_stream, readlines
@@ -95,14 +95,14 @@ class FFmpeg(EventEmitter):
             stream: A stream to input to the standard input. Defaults to None.
 
         Raises:
-            FFmpegAlreadyStarted: If FFmpeg is already executed.
+            FFmpegAlreadyExecuted: If FFmpeg is already executed.
             FFmpegError: If FFmpeg process returns non-zero exit status.
 
         Returns:
             The output to the standard output.
         """
         if self._executed:
-            raise FFmpegAlreadyStarted("FFmpeg is already executed")
+            raise FFmpegAlreadyExecuted("FFmpeg is already executed")
 
         self._executed = False
         self._terminated = False
