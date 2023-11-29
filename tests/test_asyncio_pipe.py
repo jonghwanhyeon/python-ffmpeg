@@ -39,6 +39,7 @@ async def test_asyncio_input_via_stdin(
     assert source["streams"][0]["codec_name"] == target["streams"][0]["codec_name"]
     assert source["streams"][1]["codec_name"] == target["streams"][1]["codec_name"]
 
+
 @pytest.mark.asyncio
 async def test_asyncio_output_via_stdout(
     assets_path: Path,

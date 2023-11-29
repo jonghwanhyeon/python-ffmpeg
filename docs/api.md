@@ -1,12 +1,11 @@
 # API Reference
 
-
-::: ffmpeg
+## ::: ffmpeg
     options:
       members:
         - FFmpeg
 
-::: ffmpeg.asyncio
+## ::: ffmpeg.asyncio
     options:
       show_root_heading: true
       members:
@@ -16,7 +15,17 @@
     options:
       members:
         - Progress
+
+## Exceptions
+### ::: ffmpeg
+    options:
+      members:
         - FFmpegError
+        - FFmpegAlreadyExecuted
+        - FFmpegFileExists
+        - FFmpegFileNotFound
+        - FFmpegInvalidCommand
+        - FFmpegUnsupportedCodec
 
 ## Events
 ### `start`

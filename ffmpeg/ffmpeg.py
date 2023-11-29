@@ -11,13 +11,10 @@ from pyee import EventEmitter
 from typing_extensions import Self
 
 from ffmpeg import types
+from ffmpeg.errors import FFmpegAlreadyExecuted, FFmpegError
 from ffmpeg.options import Options
 from ffmpeg.progress import Tracker
 from ffmpeg.utils import create_subprocess, ensure_io, is_windows, read_stream, readlines
-
-
-class FFmpegError(Exception):
-    pass
 
 
 class FFmpeg(EventEmitter):
@@ -98,14 +95,14 @@ class FFmpeg(EventEmitter):
             stream: A stream to input to the standard input. Defaults to None.
 
         Raises:
-            FFmpegError: If FFmpeg is already executed.
+            FFmpegAlreadyExecuted: If FFmpeg is already executed.
             FFmpegError: If FFmpeg process returns non-zero exit status.
 
         Returns:
             The output to the standard output.
         """
         if self._executed:
-            raise FFmpegError("FFmpeg is already executed")
+            raise FFmpegAlreadyExecuted("FFmpeg is already executed")
 
         self._executed = False
         self._terminated = False
@@ -147,7 +144,7 @@ class FFmpeg(EventEmitter):
         elif self._terminated:
             self.emit("terminated")
         else:
-            raise FFmpegError(f"Non-zero exit status {self._process.returncode}")
+            raise FFmpegError.create(message=futures[2].result(), arguments=arguments)
 
         return futures[1].result()
 
@@ -194,10 +191,12 @@ class FFmpeg(EventEmitter):
         self._process.stdout.close()
         return bytes(buffer)
 
-    def _handle_stderr(self):
+    def _handle_stderr(self) -> str:
         assert self._process.stderr is not None
 
+        line = b""
         for line in readlines(self._process.stderr):
             self.emit("stderr", line.decode())
 
         self._process.stderr.close()
+        return line.decode()
