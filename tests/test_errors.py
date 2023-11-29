@@ -1,111 +1,141 @@
 from pathlib import Path
-import ffmpeg
+
 import pytest
 
-
-def test_rerun_raises_FFmpegAlreadyStarted(
-    assets_path: Path,
-    tmp_path: Path,
-):
-    input = assets_path / "pier-39.ts"
-    output = tmp_path / "pier-39.mp4"
-    cmd = (
-        ffmpeg.FFmpeg()
-        .option("y")
-        .input(input)
-        .output(output, codec="copy")
-    )
-
-    with pytest.raises(ffmpeg.FFmpegAlreadyStarted):
-        cmd._executed = True
-        cmd.execute()
+from ffmpeg import (
+    FFmpeg,
+    FFmpegAlreadyStarted,
+    FFmpegFileExists,
+    FFmpegFileNotFound,
+    FFmpegInvalidCommand,
+    FFmpegUnsupportedEncoder,
+)
 
 
-def test_overwrite_file_raises_FFmpegFileExists(
-    assets_path: Path,
-    tmp_path: Path,
-):
-    input = assets_path / "pier-39.ts"
-    output = tmp_path / "pier-39.mp4"
-    cmd = (
-        ffmpeg.FFmpeg()
-        .option("y")
-        .input(input)
-        .output(output, codec="copy")
-        .execute()
-    )
-
-    with pytest.raises(ffmpeg.FFmpegFileExists):
-        (
-            ffmpeg.FFmpeg()
-            .input(input)
-            .output(output, codec="copy")
-            .execute()
-        )
-
-
-def test_missing_file_raises_FFmpegFileNotFound(
-    assets_path: Path,
-    tmp_path: Path,
-):
-    invalid_input = assets_path / "non-existent.mp4"
-    output = tmp_path / "pier-39.mp4"
-
-    with pytest.raises(ffmpeg.FFmpegFileNotFound):
-        (
-            ffmpeg.FFmpeg()
-            .input(invalid_input)
-            .output(output, codec="copy")
-            .execute()
-        )
-
-
-def test_invalid_command_raises_FFmpegInvalidCommand(
+def test_raises_already_started(
     assets_path: Path,
     tmp_path: Path,
 ):
     source_path = assets_path / "pier-39.ts"
     target_path = tmp_path / "pier-39.mp4"
-    with pytest.raises(ffmpeg.FFmpegInvalidCommand):
+
+    ffmpeg = (
+        FFmpeg()
+        .option("y")
+        .input(source_path)
+        .output(
+            target_path,
+            codec="copy",
+        )
+    )
+
+    with pytest.raises(FFmpegAlreadyStarted):
+        ffmpeg._executed = True
+        ffmpeg.execute()
+
+
+def test_raises_file_exists(
+    assets_path: Path,
+    tmp_path: Path,
+):
+    source_path = assets_path / "pier-39.ts"
+    target_path = tmp_path / "pier-39.mp4"
+
+    (
+        FFmpeg()
+        .option("y")
+        .input(source_path)
+        .output(
+            target_path,
+            codec="copy",
+        )
+        .execute()
+    )
+
+    with pytest.raises(FFmpegFileExists):
         (
-            ffmpeg.FFmpeg()
+            FFmpeg()
+            .input(source_path)
+            .output(
+                target_path,
+                codec="copy",
+            )
+            .execute()
+        )
+
+
+def test_raises_file_not_found(
+    assets_path: Path,
+    tmp_path: Path,
+):
+    invalid_source_path = assets_path / "non-existent.mp4"
+    target_path = tmp_path / "pier-39.mp4"
+
+    with pytest.raises(FFmpegFileNotFound):
+        (
+            FFmpeg()
+            .input(invalid_source_path)
+            .output(
+                target_path,
+                codec="copy",
+            )
+            .execute()
+        )
+
+
+def test_raises_invalid_command_for_invalid_option(
+    assets_path: Path,
+    tmp_path: Path,
+):
+    source_path = assets_path / "pier-39.ts"
+    target_path = tmp_path / "pier-39.mp4"
+
+    with pytest.raises(FFmpegInvalidCommand):
+        (
+            FFmpeg()
             .option("invalid")
             .input(source_path)
-            .output(target_path, codec="copy")
+            .output(
+                target_path,
+                codec="copy",
+            )
             .execute()
         )
 
 
-def test_invalid_encoder_option_raises_FFmpegInvalidOption(
+def test_raises_invalid_command_for_invalid_file_option(
     assets_path: Path,
     tmp_path: Path,
 ):
-    input = assets_path / "pier-39.ts"
-    output = tmp_path / "output.mp4"
+    source_path = assets_path / "pier-39.ts"
+    target_path = tmp_path / "pier-39.mp4"
 
-    with pytest.raises(ffmpeg.FFmpegInvalidCommand):
+    with pytest.raises(FFmpegInvalidCommand):
         (
-            ffmpeg.FFmpeg()
-            .input(input)
-            .output(output)
+            FFmpeg()
+            .option("y")
+            .input(source_path)
+            .output(target_path)
             .option("pix_fmt", "yuv420p")
             .option("preset", "fast")
-            .option("y")
             .execute()
         )
 
 
-def test_unsupported_encoder_raises_FFmpegUnsupportedEncoder(
+def test_raises_unsupported_encoder(
     assets_path: Path,
     tmp_path: Path,
 ):
-    input = assets_path / "pier-39.ts"
-    output = tmp_path / "pier-39.mp4"
+    source_path = assets_path / "pier-39.ts"
+    target_path = tmp_path / "pier-39.mp4"
 
-    with pytest.raises(ffmpeg.FFmpegUnsupportedEncoder):
+    with pytest.raises(FFmpegUnsupportedEncoder):
         (
-            ffmpeg.FFmpeg()
-            .input(input)
-            .output(output, codec="invalid")
+            FFmpeg()
+            .input(source_path)
+            .output(
+                target_path,
+                codec="invalid",
+            )
             .execute()
         )
