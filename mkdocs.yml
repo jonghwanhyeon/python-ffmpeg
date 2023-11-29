@@ -47,7 +47,7 @@ plugins:
             show_root_toc_entry: false
             members_order: source
             group_by_category: false
-            show_bases: true
+            show_bases: false
             show_source: true
 
 watch:

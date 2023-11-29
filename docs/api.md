@@ -19,6 +19,7 @@
 ## Exceptions
 ### ::: ffmpeg
     options:
+      show_bases: true
       members:
         - FFmpegError
         - FFmpegAlreadyExecuted
