@@ -48,7 +48,7 @@ plugins:
             members_order: source
             group_by_category: false
             show_bases: false
-            show_source: true
+            show_source: false
 
 watch:
   - ffmpeg

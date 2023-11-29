@@ -2,17 +2,20 @@
 
 ## ::: ffmpeg
     options:
+      show_source: true
       members:
         - FFmpeg
 
 ## ::: ffmpeg.asyncio
     options:
       show_root_heading: true
+      show_source: true
       members:
         - FFmpeg
 
 ::: ffmpeg
     options:
+      show_source: true
       members:
         - Progress
 
