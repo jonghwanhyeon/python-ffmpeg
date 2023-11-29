@@ -53,6 +53,7 @@ def test_raises_file_exists(
     )
 
     with pytest.raises(FFmpegFileExists):
+        # Note: pytest sets stdin to a null object, so "Overwrite? [y/N]" prompt will be ignored
         (
             FFmpeg()
             .input(source_path)
