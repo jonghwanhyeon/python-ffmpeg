@@ -114,10 +114,12 @@ def test_raises_invalid_command_for_invalid_file_option(
         (
             FFmpeg()
             .option("y")
-            .input(source_path)
+            .input(
+                source_path,
+                pix_fmt="yuv420p",
+                preset="fast",
+            )
             .output(target_path)
-            .option("pix_fmt", "yuv420p")
-            .option("preset", "fast")
             .execute()
         )
 
