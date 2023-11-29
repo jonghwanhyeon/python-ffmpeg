@@ -49,7 +49,7 @@ def test_missing_file_raises_FFmpegFileNotFound(
     assets_path: Path,
     tmp_path: Path,
 ):
-    invalid_input = assets_path / "non-existant.mp4"
+    invalid_input = assets_path / "non-existent.mp4"
     output = tmp_path / "pier-39.mp4"
 
     with pytest.raises(ffmpeg.FFmpegFileNotFound):
