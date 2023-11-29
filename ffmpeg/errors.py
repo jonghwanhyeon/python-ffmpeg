@@ -7,6 +7,13 @@ from typing_extensions import Self
 
 
 class FFmpegError(Exception):
+    """Represents an error that has occurred during `FFmpeg` operation.
+
+    Attributes:
+        message: An error message providing details about the error.
+        arguments: Arguments passed to FFmpeg.
+    """
+
     _patterns: ClassVar[Optional[list[str]]] = None
 
     def __init__(self, message: str, arguments: Optional[list[str]] = None):
