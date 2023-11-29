@@ -31,7 +31,7 @@ class FFmpegError(Exception):
             raise FFmpegError(message)
 
 
-class FFmpegAlreadyStarted(FFmpegError):
+class FFmpegAlreadyExecuted(FFmpegError):
     "FFmpeg was already run with this configuration and can only be executed once."
 
 

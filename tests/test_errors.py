@@ -4,7 +4,7 @@ import pytest
 
 from ffmpeg import (
     FFmpeg,
-    FFmpegAlreadyStarted,
+    FFmpegAlreadyExecuted,
     FFmpegFileExists,
     FFmpegFileNotFound,
     FFmpegInvalidCommand,
@@ -12,7 +12,7 @@ from ffmpeg import (
 )
 
 
-def test_raises_already_started(
+def test_raises_already_executed(
     assets_path: Path,
     tmp_path: Path,
 ):
@@ -29,7 +29,7 @@ def test_raises_already_started(
         )
     )
 
-    with pytest.raises(FFmpegAlreadyStarted):
+    with pytest.raises(FFmpegAlreadyExecuted):
         ffmpeg._executed = True
         ffmpeg.execute()
 

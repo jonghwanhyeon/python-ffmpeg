@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from ffmpeg import (
-    FFmpegAlreadyStarted,
+    FFmpegAlreadyExecuted,
     FFmpegFileExists,
     FFmpegFileNotFound,
     FFmpegInvalidCommand,
@@ -14,7 +14,7 @@ from ffmpeg.asyncio import FFmpeg
 
 
 @pytest.mark.asyncio
-async def test_asyncio_raises_already_started(
+async def test_asyncio_raises_already_executed(
     assets_path: Path,
     tmp_path: Path,
 ):
@@ -31,7 +31,7 @@ async def test_asyncio_raises_already_started(
         )
     )
 
-    with pytest.raises(FFmpegAlreadyStarted):
+    with pytest.raises(FFmpegAlreadyExecuted):
         ffmpeg._executed = True
         await ffmpeg.execute()
 
