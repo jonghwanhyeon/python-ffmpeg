@@ -8,7 +8,7 @@ from ffmpeg import (
     FFmpegFileExists,
     FFmpegFileNotFound,
     FFmpegInvalidCommand,
-    FFmpegUnsupportedEncoder,
+    FFmpegUnsupportedCodec,
 )
 
 
@@ -125,14 +125,35 @@ def test_raises_invalid_command_for_invalid_file_option(
         )
 
 
-def test_raises_unsupported_encoder(
+def test_raises_unsupported_codec_for_invalid_decoder(
     assets_path: Path,
     tmp_path: Path,
 ):
     source_path = assets_path / "pier-39.ts"
     target_path = tmp_path / "pier-39.mp4"
 
-    with pytest.raises(FFmpegUnsupportedEncoder):
+    with pytest.raises(FFmpegUnsupportedCodec):
+        (
+            FFmpeg()
+            .input(
+                source_path,
+                codec="invalid",
+            )
+            .output(
+                target_path,
+            )
+            .execute()
+        )
+
+
+def test_raises_unsupported_codec_for_invalid_encoders(
+    assets_path: Path,
+    tmp_path: Path,
+):
+    source_path = assets_path / "pier-39.ts"
+    target_path = tmp_path / "pier-39.mp4"
+
+    with pytest.raises(FFmpegUnsupportedCodec):
         (
             FFmpeg()
             .input(source_path)

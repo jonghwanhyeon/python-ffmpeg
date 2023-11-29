@@ -8,7 +8,7 @@ from ffmpeg import (
     FFmpegFileExists,
     FFmpegFileNotFound,
     FFmpegInvalidCommand,
-    FFmpegUnsupportedEncoder,
+    FFmpegUnsupportedCodec,
 )
 from ffmpeg.asyncio import FFmpeg
 
@@ -132,14 +132,36 @@ async def test_asyncio_raises_invalid_command_for_invalid_file_option(
 
 
 @pytest.mark.asyncio
-async def test_asyncio_raises_unsupported_encoder(
+async def test_asyncio_raises_unsupported_codec_for_invalid_encoder(
     assets_path: Path,
     tmp_path: Path,
 ):
     source_path = assets_path / "pier-39.ts"
     target_path = tmp_path / "pier-39.mp4"
 
-    with pytest.raises(FFmpegUnsupportedEncoder):
+    with pytest.raises(FFmpegUnsupportedCodec):
+        (
+            await FFmpeg()
+            .input(
+                source_path,
+                codec="invalid",
+            )
+            .output(
+                target_path,
+            )
+            .execute()
+        )
+
+
+@pytest.mark.asyncio
+async def test_asyncio_raises_unsupported_codec_for_invalid_decoder(
+    assets_path: Path,
+    tmp_path: Path,
+):
+    source_path = assets_path / "pier-39.ts"
+    target_path = tmp_path / "pier-39.mp4"
+
+    with pytest.raises(FFmpegUnsupportedCodec):
         (
             await FFmpeg()
             .input(source_path)

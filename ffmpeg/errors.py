@@ -1,51 +1,66 @@
 from __future__ import annotations
 
-from typing_extensions import Self
 import re
+from typing import ClassVar, Optional
+
+from typing_extensions import Self
 
 
 class FFmpegError(Exception):
-    @classmethod
-    def create(cls, error_message: str, command: str) -> Self:
-        message = f"{error_message}\n" f"Command: {command}"
+    _patterns: ClassVar[Optional[list[str]]] = None
 
-        error = error_message.lower()
-        if "already exists" in error:
-            raise FFmpegFileExists(message)
-        elif "no such file" in error or "could not open file" in error:
-            raise FFmpegFileNotFound(message)
-        elif "unknown encoder" in error:
-            raise FFmpegUnsupportedEncoder(message)
-        elif any(
-            (
-                "option not found" in error,
-                "unrecognized option" in error,
-                "trailing options were found on the commandline" in error,
-                "invalid encoder type" in error,
-                "codec not currently supported in container" in error,
-                "option" in error and "not found" in error,
-            )
-        ):
-            raise FFmpegInvalidCommand(message)
-        else:
-            raise FFmpegError(message)
+    def __init__(self, message: str, arguments: Optional[list[str]] = None):
+        super().__init__(message)
+
+        self.message = message
+        self.arguments = arguments
+
+    @classmethod
+    def create(cls, message: str, arguments: Optional[list[str]] = None) -> Self:
+        for subclass in cls.__subclasses__():
+            if subclass._patterns is None:
+                continue
+
+            for pattern in subclass._patterns:
+                if re.search(pattern, message, flags=re.IGNORECASE) is not None:
+                    return subclass(message, arguments)
+
+        return FFmpegError(message, arguments)
 
 
 class FFmpegAlreadyExecuted(FFmpegError):
-    "FFmpeg was already run with this configuration and can only be executed once."
+    "FFmpeg is being executed"
 
 
 class FFmpegFileExists(FFmpegError):
     "The output file already exists, you can overwrite it using the -y option"
+    _patterns = [
+        r"already exists",
+    ]
 
 
 class FFmpegFileNotFound(FFmpegError):
     "An input file was not found"
+    _patterns = [
+        r"no such file",
+        r"could not open file",
+    ]
 
 
 class FFmpegInvalidCommand(FFmpegError):
-    "FFmpeg was passed invalid options or arguments."
+    "FFmpeg was passed invalid options or arguments"
+    _patterns = [
+        r"option .* ?not found",
+        r"unrecognized option",
+        r"trailing options were found on the commandline",
+        r"invalid encoder type",
+        r"codec not currently supported in container",
+    ]
 
 
-class FFmpegUnsupportedEncoder(FFmpegError):
-    "FFmpeg attempted to encode using an unsupported encoder."
+class FFmpegUnsupportedCodec(FFmpegError):
+    "FFmpeg attempted to use an unsupported codec"
+    _patterns = [
+        r"unknown encoder",
+        r"unknown decoder",
+    ]
