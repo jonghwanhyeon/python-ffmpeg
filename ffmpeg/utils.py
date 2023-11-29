@@ -22,6 +22,11 @@ def parse_time(time: str) -> timedelta:
     )
 
 
+def extract_number(text: str) -> str:
+    match = re.search(r"[-+]?(?:\d*\.*\d+)", text)
+    return match.group(0) if match is not None else ""
+
+
 def is_windows() -> bool:
     return sys.platform == "win32"
 

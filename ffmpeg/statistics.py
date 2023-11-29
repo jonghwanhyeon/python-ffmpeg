@@ -7,19 +7,19 @@ from typing import Optional
 
 from typing_extensions import Self
 
-from ffmpeg.utils import parse_time
+from ffmpeg.utils import extract_number, parse_time
 
 # Reference: https://github.com/FFmpeg/FFmpeg/blob/release/5.1/fftools/ffmpeg.c#L1507
 
 _pattern = re.compile(r"(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)")
 
 _field_factory = {
-    "frame": int,
-    "fps": float,
-    "size": lambda item: int(item.replace("kB", "")) * 1024,
+    "frame": lambda item: int(extract_number(item)),
+    "fps": lambda item: float(extract_number(item)),
+    "size": lambda item: int(extract_number(item)) * 1024,
     "time": parse_time,
-    "bitrate": lambda item: float(item.replace("kbits/s", "")),
-    "speed": lambda item: float(item.replace("x", "")),
+    "bitrate": lambda item: float(extract_number(item)),
+    "speed": lambda item: float(extract_number(item)),
 }
 
 
