@@ -63,13 +63,36 @@ class FFmpeg(EventEmitter):
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ) -> Self:
-        """Add an input file.
+        """Add an input file with specified options.
            By calling this method multiple times, an arbitrary number of input files can be added.
 
         Args:
             url: URL for the input file.
             options: Options for the input file. Defaults to None.
             kwargs: Additional options for the input file.
+
+        Note:
+            Options for an input file can be specified in two ways:
+
+            Using `options`:
+            ```python
+            ffmpeg = FFmpeg().input("input.mp4", {"codec:v": "libx264"}).output("output.mp4")
+            # Corresponds to `ffmpeg -codec:v libx264 -i input.mp4 output.mp4`
+            ```
+
+            Using `**kwargs`:
+            ```python
+            ffmpeg = FFmpeg().input("input.mp4", vcodec="libx264").output("output.mp4")
+            # Corresponds to `ffmpeg -vcodec libx264 -i input.mp4 output.mp4`
+            ```
+
+        Note:
+            If an option does not require a value, use `None` for its value.
+
+            ```python
+            ffmpeg = FFmpeg().input("input.mp4", ignore_unknown=None).output("output.mp4")
+            # Corresponds to `ffmpeg -ignore_unknown -i input.mp4 output.mp4`
+            ```
 
         Returns:
             An instance of `FFmpeg` itself, so that calls can be chained.
@@ -83,13 +106,36 @@ class FFmpeg(EventEmitter):
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ) -> Self:
-        """Add an output file.
+        """Add an output file with specified options.
            By calling this method multiple times, an arbitrary number of output files can be specified.
 
         Args:
             url: URL for the output file.
             options: Options for the output file. Defaults to None.
             kwargs: Additional options for the output file.
+
+        Note:
+            Options for an output file can be specified in two ways:
+
+            Using `options`:
+            ```python
+            ffmpeg = FFmpeg().input("input.mp4").output("output.mp4", {"codec:v": "libx264"})
+            # Corresponds to `ffmpeg -i input.mp4 -codec:v libx264 output.mp4`
+            ```
+
+            Using `**kwargs`:
+            ```python
+            ffmpeg = FFmpeg().input("input.mp4").output("output.mp4", vcodec="libx264")
+            # Corresponds to `ffmpeg -i input.mp4 -vcodec libx264 output.mp4`
+            ```
+
+        Note:
+            If an option does not require a value, use `None` for its value.
+
+            ```python
+            ffmpeg = FFmpeg().input("input.mp4").output("output.mp4", ignore_unknown=None)
+            # Corresponds to `ffmpeg -i input.mp4 -ignore_unknown output.mp4`
+            ```
 
         Returns:
             An instance of `FFmpeg` itself, so that calls can be chained.
