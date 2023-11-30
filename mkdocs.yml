@@ -15,6 +15,7 @@ nav:
     - examples/feeding-data-to-stdin.md
     - examples/monitoring-status.md
     - examples/asynchronous-listeners.md
+    - examples/querying-metadata.md
     - examples/handling-errors.md
   - api.md
 
