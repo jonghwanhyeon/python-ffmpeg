@@ -36,18 +36,18 @@ class FFmpegError(Exception):
 
 
 class FFmpegAlreadyExecuted(FFmpegError):
-    "FFmpeg is being executed"
+    "Represents FFmpeg is being executed"
 
 
 class FFmpegFileExists(FFmpegError):
-    "The output file already exists, you can overwrite it using the -y option"
+    "Represents the output file already exists. You can overwrite it using the `-y` option"
     _patterns = [
         r"already exists",
     ]
 
 
 class FFmpegFileNotFound(FFmpegError):
-    "An input file was not found"
+    "Represents an input file was not found"
     _patterns = [
         r"no such file",
         r"could not open file",
@@ -55,7 +55,7 @@ class FFmpegFileNotFound(FFmpegError):
 
 
 class FFmpegInvalidCommand(FFmpegError):
-    "FFmpeg was passed invalid options or arguments"
+    "Represents FFmpeg was passed invalid options or arguments"
     _patterns = [
         r"option .* ?not found",
         r"unrecognized option",
@@ -66,7 +66,7 @@ class FFmpegInvalidCommand(FFmpegError):
 
 
 class FFmpegUnsupportedCodec(FFmpegError):
-    "FFmpeg attempted to use an unsupported codec"
+    "Represents FFmpeg attempted to use an unsupported codec"
     _patterns = [
         r"unknown encoder",
         r"unknown decoder",
