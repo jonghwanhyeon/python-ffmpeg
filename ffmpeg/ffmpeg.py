@@ -35,6 +35,15 @@ class FFmpeg(EventEmitter):
 
         self._tracker = Tracker(self)  # type: ignore
 
+    @property
+    def arguments(self) -> list[str]:
+        """Return a list of arguments to be used when executing FFmpeg.
+
+        Returns:
+            A lit of arguments to be used when executing FFmpeg.
+        """
+        return [self._executable, *self._options.build()]
+
     def option(self, key: str, value: Optional[types.Option] = None) -> Self:
         """Add a global option `-key` or `-key value`.
 
@@ -110,11 +119,10 @@ class FFmpeg(EventEmitter):
         if stream is not None:
             stream = ensure_io(stream)
 
-        arguments = [self._executable, *self._options.build()]
-        self.emit("start", arguments)
+        self.emit("start", self.arguments)
 
         self._process = create_subprocess(
-            arguments,
+            self.arguments,
             bufsize=0,
             stdin=subprocess.PIPE if stream is not None else None,
             stdout=subprocess.PIPE,
@@ -144,7 +152,7 @@ class FFmpeg(EventEmitter):
         elif self._terminated:
             self.emit("terminated")
         else:
-            raise FFmpegError.create(message=futures[2].result(), arguments=arguments)
+            raise FFmpegError.create(message=futures[2].result(), arguments=self.arguments)
 
         return futures[1].result()
 

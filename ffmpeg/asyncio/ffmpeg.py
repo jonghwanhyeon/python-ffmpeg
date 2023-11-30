@@ -38,6 +38,15 @@ class FFmpeg(AsyncIOEventEmitter):
 
         self.once("error", self._reraise_exception)
 
+    @property
+    def arguments(self) -> list[str]:
+        """Return a list of arguments to be used when executing FFmpeg.
+
+        Returns:
+            A lit of arguments to be used when executing FFmpeg.
+        """
+        return [self._executable, *self._options.build()]
+
     def option(self, key: str, value: Optional[types.Option] = None) -> Self:
         """Add a global option `-key` or `-key value`.
 
@@ -113,11 +122,10 @@ class FFmpeg(AsyncIOEventEmitter):
         if stream is not None:
             stream = ensure_stream_reader(stream)
 
-        arguments = [self._executable, *self._options.build()]
-        self.emit("start", arguments)
+        self.emit("start", self.arguments)
 
         self._process = await create_subprocess(
-            *arguments,
+            *self.arguments,
             stdin=subprocess.PIPE if stream is not None else None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -140,7 +148,7 @@ class FFmpeg(AsyncIOEventEmitter):
         elif self._terminated:
             self.emit("terminated")
         else:
-            raise FFmpegError.create(message=tasks[2].result(), arguments=arguments)
+            raise FFmpegError.create(message=tasks[2].result(), arguments=self.arguments)
 
         return tasks[1].result()
 

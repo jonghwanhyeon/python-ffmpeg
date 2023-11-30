@@ -12,6 +12,10 @@ class FFmpegProtocol(Protocol):
     def __init__(self, executable: str = "ffmpeg"):
         ...
 
+    @property
+    def arguments(self) -> list[str]:
+        ...
+
     def option(self, key: str, value: Optional[types.Option] = None) -> Self:
         ...
 
