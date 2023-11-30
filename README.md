@@ -1,4 +1,6 @@
 # python-ffmpeg
+![Build status](https://github.com/jonghwanhyeon/python-ffmpeg/actions/workflows/wheels.yml/badge.svg)
+
 A python binding for FFmpeg which provides sync and async APIs
 
 ## Help
