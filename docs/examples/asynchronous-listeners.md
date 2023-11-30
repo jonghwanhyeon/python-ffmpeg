@@ -1,4 +1,4 @@
-# Asynchronous Listeners
+# Asynchronous listeners
 
 When using the Asynchronous API, event listeners may be either regular functions or coroutines.
 
