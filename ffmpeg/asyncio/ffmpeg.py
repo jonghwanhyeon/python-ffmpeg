@@ -114,7 +114,7 @@ class FFmpeg(AsyncIOEventEmitter):
             The output to the standard output.
         """
         if self._executed:
-            raise FFmpegAlreadyExecuted("FFmpeg is already executed")
+            raise FFmpegAlreadyExecuted("FFmpeg is already executed", arguments=self.arguments)
 
         self._executed = False
         self._terminated = False
@@ -159,7 +159,7 @@ class FFmpeg(AsyncIOEventEmitter):
             FFmpegError: If FFmpeg is not executed
         """
         if not self._executed:
-            raise FFmpegError("FFmpeg is not executed")
+            raise FFmpegError("FFmpeg is not executed", arguments=self.arguments)
 
         sigterm = signal.SIGTERM
         if is_windows():

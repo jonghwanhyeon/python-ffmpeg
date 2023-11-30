@@ -16,14 +16,14 @@ class FFmpegError(Exception):
 
     _patterns: ClassVar[Optional[list[str]]] = None
 
-    def __init__(self, message: str, arguments: Optional[list[str]] = None):
+    def __init__(self, message: str, arguments: list[str]):
         super().__init__(message)
 
         self.message = message
         self.arguments = arguments
 
     @classmethod
-    def create(cls, message: str, arguments: Optional[list[str]] = None) -> Self:
+    def create(cls, message: str, arguments: list[str]) -> Self:
         for subclass in cls.__subclasses__():
             if subclass._patterns is None:
                 continue
