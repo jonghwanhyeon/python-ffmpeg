@@ -11,7 +11,7 @@ from ffmpeg.utils import parse_time
 
 # Reference: https://github.com/FFmpeg/FFmpeg/blob/release/5.1/fftools/ffmpeg.c#L1507
 
-_pattern = re.compile(r"(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)")
+_pattern = re.compile(r"(frame|fps|(?<!stack-)size|time|bitrate|speed)\s*\=\s*(\S+)")
 
 _field_factory = {
     "frame": int,
