@@ -9,9 +9,9 @@ from typing_extensions import Self
 
 from ffmpeg.utils import parse_time
 
-# Reference: https://github.com/FFmpeg/FFmpeg/blob/release/5.1/fftools/ffmpeg.c#L1507
+# Reference: https://github.com/FFmpeg/FFmpeg/blob/release/6.1/fftools/ffmpeg.c#L496
 
-_pattern = re.compile(r"(frame|fps|(?<!stack-)size|time|bitrate|speed)\s*\=\s*(\S+)")
+_pattern = re.compile(r"(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)")
 
 _field_factory = {
     "frame": int,
@@ -34,9 +34,9 @@ class Statistics:
 
     @classmethod
     def from_line(cls, line: str) -> Optional[Self]:
-        statistics = {key: value for key, value in _pattern.findall(line) if value != "N/A"}
-        if not statistics:
+        statistics = {key: value for key, value in _pattern.findall(line)}
+        if len(statistics) != len(_field_factory):
             return None
 
-        fields = {key: _field_factory[key](value) for key, value in statistics.items()}
+        fields = {key: _field_factory[key](value) for key, value in statistics.items() if value != "N/A"}
         return Statistics(**fields)
