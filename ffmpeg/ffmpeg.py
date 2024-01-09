@@ -143,7 +143,7 @@ class FFmpeg(EventEmitter):
         self._options.output(url, options, **kwargs)
         return self
 
-    def execute(self, stream: Optional[Union[bytes, IO[bytes]]] = None) -> bytes:
+    def execute(self, timeout=None, stream: Optional[Union[bytes, IO[bytes]]] = None) -> bytes:
         """Execute FFmpeg using specified global options and files.
 
         Args:
@@ -185,7 +185,7 @@ class FFmpeg(EventEmitter):
                 executor.submit(self._process.wait),
             ]
 
-            for future in concurrent.futures.as_completed(futures):
+            for future in concurrent.futures.as_completed(futures, timeout=timeout):
                 exception = future.exception()
                 if exception is not None:
                     self._process.terminate()
