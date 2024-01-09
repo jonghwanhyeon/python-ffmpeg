@@ -148,10 +148,12 @@ class FFmpeg(EventEmitter):
 
         Args:
             stream: A stream to input to the standard input. Defaults to None.
+            timeout: The maximum number of seconds to wait before returning. Defaults to None.
 
         Raises:
             FFmpegAlreadyExecuted: If FFmpeg is already executed.
             FFmpegError: If FFmpeg process returns non-zero exit status.
+            subprocess.TimeoutExpired: If FFmpeg process does not terminate after `timeout` seconds.
 
         Returns:
             The output to the standard output.
