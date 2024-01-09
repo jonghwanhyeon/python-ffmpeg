@@ -179,7 +179,7 @@ class FFmpeg(AsyncIOEventEmitter):
 
         self._executed = True
 
-        tasks: list[asyncio.Task] = [
+        tasks = [
             asyncio.create_task(self._write_stdin(stream)),
             asyncio.create_task(self._read_stdout()),
             asyncio.create_task(self._handle_stderr()),
