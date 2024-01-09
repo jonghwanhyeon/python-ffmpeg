@@ -146,7 +146,9 @@ class FFmpeg(AsyncIOEventEmitter):
         self._options.output(url, options, **kwargs)
         return self
 
-    async def execute(self, stream: Optional[Union[bytes, asyncio.StreamReader]] = None) -> bytes:
+    async def execute(
+        self, stream: Optional[Union[bytes, asyncio.StreamReader]] = None, timeout: Optional[float] = None
+    ) -> bytes:
         """Execute FFmpeg using specified global options and files.
 
         Args:
@@ -178,16 +180,23 @@ class FFmpeg(AsyncIOEventEmitter):
         )
 
         self._executed = True
-
         tasks = [
             asyncio.create_task(self._write_stdin(stream)),
             asyncio.create_task(self._read_stdout()),
             asyncio.create_task(self._handle_stderr()),
-            asyncio.create_task(self._process.wait()),
+            asyncio.create_task(asyncio.wait_for(self._process.wait(), timeout=timeout)),
         ]
-        await asyncio.wait(tasks)
-
+        done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_EXCEPTION)
         self._executed = False
+
+        for task in done:
+            exception = task.exception()
+            if exception is not None:
+                self._process.terminate()
+                for task in pending:
+                    await task
+
+                raise exception
 
         if self._process.returncode == 0:
             self.emit("completed")
