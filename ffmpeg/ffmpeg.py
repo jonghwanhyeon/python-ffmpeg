@@ -143,7 +143,7 @@ class FFmpeg(EventEmitter):
         self._options.output(url, options, **kwargs)
         return self
 
-    def execute(self, timeout=None, stream: Optional[Union[bytes, IO[bytes]]] = None) -> bytes:
+    def execute(self, timeout: Optional[float] = None, stream: Optional[Union[bytes, IO[bytes]]] = None) -> bytes:
         """Execute FFmpeg using specified global options and files.
 
         Args:
