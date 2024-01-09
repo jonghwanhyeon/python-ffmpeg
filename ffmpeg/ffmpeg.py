@@ -175,23 +175,24 @@ class FFmpeg(EventEmitter):
             stderr=subprocess.PIPE,
         )
 
-        self._executed = True
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            self._executed = True
             futures = [
                 executor.submit(self._write_stdin, stream),
                 executor.submit(self._read_stdout),
                 executor.submit(self._handle_stderr),
-                executor.submit(self._process.wait),
+                executor.submit(self._process.wait, timeout),
             ]
+            done, pending = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_EXCEPTION)
+            self._executed = False
 
-            for future in concurrent.futures.as_completed(futures, timeout=timeout):
+            for future in done:
                 exception = future.exception()
                 if exception is not None:
                     self._process.terminate()
-                    raise exception
+                    concurrent.futures.wait(pending)
 
-        self._executed = False
+                    raise exception
 
         if self._process.returncode == 0:
             self.emit("completed")
