@@ -66,3 +66,32 @@ async def test_asyncio_output_via_stdout(
 
     assert abs(float(source["format"]["duration"]) - float(target["format"]["duration"])) <= epsilon
     assert target["format"]["format_name"] == "ogg"
+
+
+@pytest.mark.asyncio
+async def test_asyncio_output_stream(
+        assets_path: Path,
+        tmp_path: Path,
+):
+    source_path = assets_path / "brewing.wav"
+    target_path = tmp_path / "brewing.ogg"
+
+    ffmpeg = (
+        FFmpeg()
+        .option("y")
+        .input(source_path)
+        .output(
+            "pipe:1",
+            f="ogg",
+        )
+    )
+    with open(target_path, "wb") as target_file:
+        async for chunk in ffmpeg.execute_stream_stdout():
+            target_file.write(chunk)
+
+    source = probe(source_path)
+    target = probe(target_path)
+
+    assert abs(float(source["format"]["duration"]) - float(target["format"]["duration"])) <= epsilon
+    assert target["format"]["format_name"] == "ogg"
+
