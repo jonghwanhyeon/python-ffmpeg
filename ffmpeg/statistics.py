@@ -35,8 +35,6 @@ class Statistics:
     @classmethod
     def from_line(cls, line: str) -> Optional[Self]:
         statistics = {key: value for key, value in _pattern.findall(line)}
-        if len(statistics) != len(_field_factory):
-            return None
 
         fields = {key: _field_factory[key](value) for key, value in statistics.items() if value != "N/A"}
         return Statistics(**fields)
