@@ -35,7 +35,11 @@ class Statistics:
     @classmethod
     def from_line(cls, line: str) -> Optional[Self]:
         statistics = {key: value for key, value in _pattern.findall(line)}
-        if len(statistics) != len(_field_factory):
+        if len(statistics) < 4:
+            # When a media type is audio,FFmpeg reports the below statistics
+            # - size, time, bitrate, speed
+            # When a media type is video, FFmpeg reports the below statistics
+            # - frame, fps, size, time, bitrate, speed
             return None
 
         fields = {key: _field_factory[key](value) for key, value in statistics.items() if value != "N/A"}
