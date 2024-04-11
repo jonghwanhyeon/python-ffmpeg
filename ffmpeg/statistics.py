@@ -39,4 +39,4 @@ class Statistics:
             return None
 
         fields = {key: _field_factory[key](value) for key, value in statistics.items() if value != "N/A"}
-        return Statistics(**fields)
+        return cls(**fields)

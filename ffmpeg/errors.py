@@ -32,7 +32,7 @@ class FFmpegError(Exception):
                 if re.search(pattern, message, flags=re.IGNORECASE) is not None:
                     return subclass(message, arguments)
 
-        return FFmpegError(message, arguments)
+        return cls(message, arguments)
 
 
 class FFmpegAlreadyExecuted(FFmpegError):
@@ -69,5 +69,7 @@ class FFmpegUnsupportedCodec(FFmpegError):
     "Represents FFmpeg attempted to use an unsupported codec"
     _patterns = [
         r"unknown encoder",
+        r"encoder not found",
         r"unknown decoder",
+        r"decoder not found",
     ]
