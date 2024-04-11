@@ -39,13 +39,6 @@ class FFmpegAlreadyExecuted(FFmpegError):
     "Represents FFmpeg is being executed"
 
 
-class FFmpegFileExists(FFmpegError):
-    "Represents the output file already exists. You can overwrite it using the `-y` option"
-    _patterns = [
-        r"already exists",
-    ]
-
-
 class FFmpegFileNotFound(FFmpegError):
     "Represents an input file was not found"
     _patterns = [

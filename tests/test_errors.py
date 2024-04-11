@@ -2,14 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ffmpeg import (
-    FFmpeg,
-    FFmpegAlreadyExecuted,
-    FFmpegFileExists,
-    FFmpegFileNotFound,
-    FFmpegInvalidCommand,
-    FFmpegUnsupportedCodec,
-)
+from ffmpeg import FFmpeg, FFmpegAlreadyExecuted, FFmpegFileNotFound, FFmpegInvalidCommand, FFmpegUnsupportedCodec
 
 
 def test_raises_already_executed(
@@ -32,37 +25,6 @@ def test_raises_already_executed(
     with pytest.raises(FFmpegAlreadyExecuted):
         ffmpeg._executed = True
         ffmpeg.execute()
-
-
-def test_raises_file_exists(
-    assets_path: Path,
-    tmp_path: Path,
-):
-    source_path = assets_path / "pier-39.ts"
-    target_path = tmp_path / "pier-39.mp4"
-
-    (
-        FFmpeg()
-        .option("y")
-        .input(source_path)
-        .output(
-            target_path,
-            codec="copy",
-        )
-        .execute()
-    )
-
-    with pytest.raises(FFmpegFileExists):
-        # Note: pytest sets stdin to a null object, so "Overwrite? [y/N]" prompt will be ignored
-        (
-            FFmpeg()
-            .input(source_path)
-            .output(
-                target_path,
-                codec="copy",
-            )
-            .execute()
-        )
 
 
 def test_raises_file_not_found(

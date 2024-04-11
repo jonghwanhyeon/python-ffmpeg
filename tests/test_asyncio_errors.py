@@ -3,13 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from ffmpeg import (
-    FFmpegAlreadyExecuted,
-    FFmpegFileExists,
-    FFmpegFileNotFound,
-    FFmpegInvalidCommand,
-    FFmpegUnsupportedCodec,
-)
+from ffmpeg import FFmpegAlreadyExecuted, FFmpegFileNotFound, FFmpegInvalidCommand, FFmpegUnsupportedCodec
 from ffmpeg.asyncio import FFmpeg
 
 
@@ -34,38 +28,6 @@ async def test_asyncio_raises_already_executed(
     with pytest.raises(FFmpegAlreadyExecuted):
         ffmpeg._executed = True
         await ffmpeg.execute()
-
-
-@pytest.mark.asyncio
-async def test_asyncio_raises_file_exists(
-    assets_path: Path,
-    tmp_path: Path,
-):
-    source_path = assets_path / "pier-39.ts"
-    target_path = tmp_path / "pier-39.mp4"
-
-    (
-        await FFmpeg()
-        .option("y")
-        .input(source_path)
-        .output(
-            target_path,
-            codec="copy",
-        )
-        .execute()
-    )
-
-    with pytest.raises(FFmpegFileExists):
-        # Note: pytest sets stdin to a null object, so "Overwrite? [y/N]" prompt will be ignored
-        (
-            await FFmpeg()
-            .input(source_path)
-            .output(
-                target_path,
-                codec="copy",
-            )
-            .execute()
-        )
 
 
 @pytest.mark.asyncio
