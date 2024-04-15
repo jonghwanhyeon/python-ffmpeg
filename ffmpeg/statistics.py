@@ -7,7 +7,7 @@ from typing import Optional
 
 from typing_extensions import Self
 
-from ffmpeg.utils import parse_time
+from ffmpeg.utils import parse_time, parse_size
 
 # Reference: https://github.com/FFmpeg/FFmpeg/blob/release/6.1/fftools/ffmpeg.c#L496
 
@@ -16,7 +16,7 @@ _pattern = re.compile(r"(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)")
 _field_factory = {
     "frame": int,
     "fps": float,
-    "size": lambda item: int(item.replace("kB", "")) * 1024,
+    "size": parse_size,
     "time": parse_time,
     "bitrate": lambda item: float(item.replace("kbits/s", "")),
     "speed": lambda item: float(item.replace("x", "")),

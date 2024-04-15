@@ -21,6 +21,14 @@ def parse_time(time: str) -> timedelta:
         milliseconds=int(match.group(4)) * 10,
     )
 
+# https://github.com/FFmpeg/FFmpeg/blob/d38bf5e08e768722096723b5c8781cd2eb18d070/fftools/ffmpeg.c#L618C53-L618C56
+def parse_size(item: str) -> int:
+    if "kB" in item:
+        return int(item.replace("kB", "")) * 1024
+    elif "KiB" in item:
+        return int(item.replace("KiB", "")) * 1024
+    else:
+        raise ValueError(f"Unknown size format: {item}")
 
 def is_windows() -> bool:
     return sys.platform == "win32"
