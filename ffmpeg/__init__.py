@@ -2,4 +2,4 @@ from .errors import FFmpegAlreadyExecuted, FFmpegError, FFmpegFileNotFound, FFmp
 from .ffmpeg import FFmpeg
 from .progress import Progress
 
-__version__ = "2.0.11"
+__version__ = "2.0.12"
