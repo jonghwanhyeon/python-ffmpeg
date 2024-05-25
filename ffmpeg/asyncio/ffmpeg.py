@@ -257,9 +257,9 @@ class FFmpeg(AsyncIOEventEmitter):
 
         line = b""
         async for line in readlines(self._process.stderr):
-            self.emit("stderr", line.decode())
+            self.emit("stderr", line.decode(errors='replace'))
 
-        return line.decode()
+        return line.decode(errors='replace')
 
     def _reraise_exception(self, exception: Exception):
         raise exception

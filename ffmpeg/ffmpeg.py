@@ -253,7 +253,7 @@ class FFmpeg(EventEmitter):
 
         line = b""
         for line in readlines(self._process.stderr):
-            self.emit("stderr", line.decode())
+            self.emit("stderr", line.decode(errors='replace'))
 
         self._process.stderr.close()
-        return line.decode()
+        return line.decode(errors='replace')
