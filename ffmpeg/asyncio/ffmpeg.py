@@ -255,11 +255,12 @@ class FFmpeg(AsyncIOEventEmitter):
     async def _handle_stderr(self) -> str:
         assert self._process.stderr is not None
 
-        line = b""
-        async for line in readlines(self._process.stderr):
-            self.emit("stderr", line.decode())
+        line = ""
+        async for line_bytes in readlines(self._process.stderr):
+            line = line_bytes.decode(errors="backslashreplace")
+            self.emit("stderr", line)
 
-        return line.decode()
+        return line
 
     def _reraise_exception(self, exception: Exception):
         raise exception

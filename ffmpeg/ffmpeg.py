@@ -251,9 +251,10 @@ class FFmpeg(EventEmitter):
     def _handle_stderr(self) -> str:
         assert self._process.stderr is not None
 
-        line = b""
-        for line in readlines(self._process.stderr):
-            self.emit("stderr", line.decode())
+        line = ""
+        for line_bytes in readlines(self._process.stderr):
+            line = line_bytes.decode(errors="backslashreplace")
+            self.emit("stderr", line)
 
         self._process.stderr.close()
-        return line.decode()
+        return line
