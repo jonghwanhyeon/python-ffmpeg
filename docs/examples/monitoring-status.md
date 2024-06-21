@@ -100,5 +100,5 @@ In **python-ffmpeg**, the processing status of ffmpeg can be monitored through e
 
 
     if __name__ == "__main__":
-        main()
+        asyncio.run(main())
     ```
