@@ -5,7 +5,8 @@ import io
 import os
 import signal
 import subprocess
-from typing import IO, Optional, Union
+from multiprocessing.sharedctypes import Synchronized
+from typing import IO, Callable, Iterable, Optional, Union
 
 from pyee import EventEmitter
 from typing_extensions import Self
@@ -143,12 +144,20 @@ class FFmpeg(EventEmitter):
         self._options.output(url, options, **kwargs)
         return self
 
-    def execute(self, stream: Optional[Union[bytes, IO[bytes]]] = None, timeout: Optional[float] = None) -> bytes:
+    def execute(
+        self,
+        stream: Optional[Union[bytes, IO[bytes]]] = None,
+        timeout: Optional[float] = None,
+        initializer: Optional[Callable[[Synchronized], None]] = None,
+        initargs: Iterable = (),
+    ) -> bytes:
         """Execute FFmpeg using specified global options and files.
 
         Args:
             stream: A stream to input to the standard input. Defaults to None.
             timeout: The maximum number of seconds to wait before returning. Defaults to None.
+            initializer: A callable used to initialize worker threads. Defaults to None.
+            initargs: A tuple of arguments to pass to the initializer.
 
         Raises:
             FFmpegAlreadyExecuted: If FFmpeg is already executed.
@@ -177,7 +186,9 @@ class FFmpeg(EventEmitter):
             stderr=subprocess.PIPE,
         )
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=4, initializer=initializer, initargs=initargs
+        ) as executor:
             self._executed = True
             futures = [
                 executor.submit(self._write_stdin, stream),
