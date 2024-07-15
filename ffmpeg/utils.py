@@ -39,7 +39,9 @@ def create_subprocess(*args: Any, **kwargs: Any) -> subprocess.Popen:
     # which is required to gracefully terminate the FFmpeg process.
     # Reference: https://docs.python.org/3/library/subprocess.html#subprocess.Popen.send_signal
     if is_windows():
-        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore
+        if "creationflags" not in kwargs:
+            kwargs["creationflags"] = 0
+        kwargs["creationflags"] |= subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore
 
     return subprocess.Popen(*args, **kwargs)
 

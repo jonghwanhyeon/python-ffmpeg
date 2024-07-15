@@ -13,7 +13,9 @@ def create_subprocess(*args: Any, **kwargs: Any) -> Awaitable[asyncio.subprocess
     # which is required to gracefully terminate the FFmpeg process.
     # Reference: https://docs.python.org/3/library/asyncio-subprocess.html#asyncio.subprocess.Process.send_signal
     if is_windows():
-        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore
+        if "creationflags" not in kwargs:
+            kwargs["creationflags"] = 0
+        kwargs["creationflags"] |= subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore
 
     return asyncio.create_subprocess_exec(*args, **kwargs)
 

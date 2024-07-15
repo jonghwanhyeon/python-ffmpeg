@@ -18,15 +18,25 @@ from ffmpeg.utils import create_subprocess, ensure_io, is_windows, read_stream, 
 
 
 class FFmpeg(EventEmitter):
-    def __init__(self, executable: str = "ffmpeg"):
+    def __init__(self, executable: str = "ffmpeg", niceness: int = 0):
         """Initialize an `FFmpeg` instance.
 
         Args:
             executable: The path to the ffmpeg executable. Defaults to "ffmpeg".
+            niceness: The niceness of the ffmpeg process
+            (between -20 and 19, higher niceness is lower priority).
+            Defaults to 0 (no change).
+            On Windows, n < -10 is High priority, -10 <= n < 0 is Above Average,
+            0 < n <= 10 is Below Average, and n > 10 is Idle.
+            On Linux, niceness below 0 requires root privileges.
         """
         super().__init__()
 
         self._executable: str = executable
+        if isinstance(niceness, int) and -20 <= niceness <= 19:
+            self._niceness: int = niceness
+        else:
+            raise ValueError("Niceness must be an int between -20 and 19")
         self._options: Options = Options()
 
         self._process: subprocess.Popen[bytes]
@@ -169,12 +179,30 @@ class FFmpeg(EventEmitter):
 
         self.emit("start", self.arguments)
 
+        prio_args = {}
+
+        if self._niceness != 0:
+            if is_windows():
+                creationflags = 0
+                if self._niceness < -10:
+                    creationflags = subprocess.HIGH_PRIORITY_CLASS  # type: ignore
+                elif self._niceness < 0:
+                    creationflags = subprocess.ABOVE_NORMAL_PRIORITY_CLASS  # type: ignore
+                elif self._niceness > 10:
+                    creationflags = subprocess.IDLE_PRIORITY_CLASS  # type: ignore
+                elif self._niceness > 0:
+                    creationflags = subprocess.BELOW_NORMAL_PRIORITY_CLASS  # type: ignore
+                prio_args["creationflags"] = creationflags
+            else:
+                prio_args["preexec_fn"] = lambda: os.nice(self._niceness)  # type: ignore
+
         self._process = create_subprocess(
             self.arguments,
             bufsize=0,
             stdin=subprocess.PIPE if stream is not None else None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            **prio_args,
         )
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
