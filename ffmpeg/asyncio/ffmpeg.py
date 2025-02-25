@@ -5,17 +5,19 @@ import io
 import os
 import signal
 import subprocess
-from typing import Optional, Union
+import sys
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from pyee.asyncio import AsyncIOEventEmitter
 from typing_extensions import Self
 
-from ffmpeg import types
-from ffmpeg.asyncio.utils import create_subprocess, ensure_stream_reader, read_stream, readlines
+from ffmpeg.asyncio.utils import create_subprocess, ensure_async_iterable, read_stream, readlines
 from ffmpeg.ffmpeg import FFmpegAlreadyExecuted, FFmpegError
 from ffmpeg.options import Options
 from ffmpeg.progress import Tracker
-from ffmpeg.utils import is_windows
+
+if TYPE_CHECKING:
+    from ffmpeg import types
 
 
 class FFmpeg(AsyncIOEventEmitter):
@@ -34,7 +36,7 @@ class FFmpeg(AsyncIOEventEmitter):
         self._executed: bool = False
         self._terminated: bool = False
 
-        self._tracker = Tracker(self)  # type: ignore
+        self._tracker = Tracker(self)
 
         self.once("error", self._reraise_exception)
 
@@ -62,7 +64,7 @@ class FFmpeg(AsyncIOEventEmitter):
 
     def input(
         self,
-        url: Union[str, os.PathLike],
+        url: Union[str, os.PathLike[str]],
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ) -> Self:
@@ -105,7 +107,7 @@ class FFmpeg(AsyncIOEventEmitter):
 
     def output(
         self,
-        url: Union[str, os.PathLike],
+        url: Union[str, os.PathLike[str]],
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ) -> Self:
@@ -146,9 +148,7 @@ class FFmpeg(AsyncIOEventEmitter):
         self._options.output(url, options, **kwargs)
         return self
 
-    async def execute(
-        self, stream: Optional[Union[bytes, asyncio.StreamReader]] = None, timeout: Optional[float] = None
-    ) -> bytes:
+    async def execute(self, stream: Optional[types.AsyncStream] = None, timeout: Optional[float] = None) -> bytes:
         """Execute FFmpeg using specified global options and files.
 
         Args:
@@ -170,24 +170,25 @@ class FFmpeg(AsyncIOEventEmitter):
         self._terminated = False
 
         if stream is not None:
-            stream = ensure_stream_reader(stream)
+            _stream = ensure_async_iterable(stream)
+        else:
+            _stream = None
 
         self.emit("start", self.arguments)
 
         self._process = await create_subprocess(
             *self.arguments,
-            stdin=subprocess.PIPE if stream is not None else None,
+            stdin=subprocess.PIPE if _stream is not None else None,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
 
         self._executed = True
-        tasks = [
-            asyncio.create_task(self._write_stdin(stream)),
-            asyncio.create_task(self._read_stdout()),
-            asyncio.create_task(self._handle_stderr()),
-            asyncio.create_task(asyncio.wait_for(self._process.wait(), timeout=timeout)),
-        ]
+        stdin_task = asyncio.create_task(self._write_stdin(_stream))
+        stdout_task = asyncio.create_task(self._read_stdout())
+        stderr_task = asyncio.create_task(self._handle_stderr())
+        process_task = asyncio.create_task(asyncio.wait_for(self._process.wait(), timeout=timeout))
+        tasks: list[asyncio.Task[Any]] = [stdin_task, stdout_task, stderr_task, process_task]
         done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_EXCEPTION)
         self._executed = False
 
@@ -205,9 +206,9 @@ class FFmpeg(AsyncIOEventEmitter):
         elif self._terminated:
             self.emit("terminated")
         else:
-            raise FFmpegError.create(message=tasks[2].result(), arguments=self.arguments)
+            raise FFmpegError.create(message=stderr_task.result(), arguments=self.arguments)
 
-        return tasks[1].result()
+        return stdout_task.result()
 
     def terminate(self):
         """Gracefully terminate the running FFmpeg process.
@@ -219,24 +220,24 @@ class FFmpeg(AsyncIOEventEmitter):
             raise FFmpegError("FFmpeg is not executed", arguments=self.arguments)
 
         sigterm = signal.SIGTERM
-        if is_windows():
+        if sys.platform == "win32":
             # On Windows, SIGTERM is an alias for TerminateProcess().
             # To gracefully terminate the FFmpeg process, we should use CTRL_BREAK_EVENT signal.
             # References:
             # - https://docs.python.org/3.10/library/subprocess.html#subprocess.Popen.send_signal
             # - https://github.com/FFmpeg/FFmpeg/blob/release/5.1/fftools/ffmpeg.c#L371
-            sigterm = signal.CTRL_BREAK_EVENT  # type: ignore
+            sigterm = signal.CTRL_BREAK_EVENT
 
         self._terminated = True
         self._process.send_signal(sigterm)
 
-    async def _write_stdin(self, stream: Optional[asyncio.StreamReader]):
+    async def _write_stdin(self, stream: Optional[types.AsyncIterable[bytes]]):
         if stream is None:
             return
 
         assert self._process.stdin is not None
 
-        async for chunk in read_stream(stream, size=io.DEFAULT_BUFFER_SIZE):
+        async for chunk in stream:
             self._process.stdin.write(chunk)
             await self._process.stdin.drain()
 

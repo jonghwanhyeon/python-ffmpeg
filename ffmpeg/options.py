@@ -2,19 +2,21 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Iterable, Optional, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Union
 
-from ffmpeg import types
 from ffmpeg.file import InputFile, OutputFile
+
+if TYPE_CHECKING:
+    from ffmpeg import types
 
 
 def _unpack_options(options: dict[str, Optional[types.Option]]) -> Iterable[Option]:
     for key, values in options.items():
-        if not isinstance(values, (list, set, tuple)):
-            values = [values]
-
-        for value in values:
-            yield Option(key, value)
+        if isinstance(values, (list, set, tuple)):
+            for value in values:
+                yield Option(key, value)
+        else:
+            yield Option(key, values)
 
 
 @dataclass(frozen=True)
@@ -40,7 +42,7 @@ class Options:
 
     def input(
         self,
-        url: Union[str, os.PathLike],
+        url: Union[str, os.PathLike[str]],
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ):
@@ -53,7 +55,7 @@ class Options:
 
     def output(
         self,
-        url: Union[str, os.PathLike],
+        url: Union[str, os.PathLike[str]],
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ):

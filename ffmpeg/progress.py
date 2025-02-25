@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import timedelta
+from typing import TYPE_CHECKING
 
-from ffmpeg.protocol import FFmpegProtocol
 from ffmpeg.statistics import Statistics
+
+if TYPE_CHECKING:
+    from ffmpeg.protocol import ExecuteType_co, FFmpegProtocol
 
 
 @dataclass(frozen=True)
@@ -29,7 +32,7 @@ class Progress:
 
 
 class Tracker:
-    def __init__(self, ffmpeg: FFmpegProtocol):
+    def __init__(self, ffmpeg: FFmpegProtocol[ExecuteType_co]):
         self._ffmpeg = ffmpeg
         self._ffmpeg.on("stderr", self._on_stderr)
 

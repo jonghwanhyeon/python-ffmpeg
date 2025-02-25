@@ -5,16 +5,19 @@ import io
 import os
 import signal
 import subprocess
-from typing import IO, Optional, Union
+import sys
+from typing import IO, TYPE_CHECKING, Any, Optional, Union
 
 from pyee import EventEmitter
 from typing_extensions import Self
 
-from ffmpeg import types
 from ffmpeg.errors import FFmpegAlreadyExecuted, FFmpegError
 from ffmpeg.options import Options
 from ffmpeg.progress import Tracker
-from ffmpeg.utils import create_subprocess, ensure_io, is_windows, read_stream, readlines
+from ffmpeg.utils import create_subprocess, ensure_io, read_stream, readlines
+
+if TYPE_CHECKING:
+    from ffmpeg import types
 
 
 class FFmpeg(EventEmitter):
@@ -33,14 +36,14 @@ class FFmpeg(EventEmitter):
         self._executed: bool = False
         self._terminated: bool = False
 
-        self._tracker = Tracker(self)  # type: ignore
+        self._tracker = Tracker(self)
 
     @property
     def arguments(self) -> list[str]:
         """Return a list of arguments to be used when executing FFmpeg.
 
         Returns:
-            A lit of arguments to be used when executing FFmpeg.
+            A list of arguments to be used when executing FFmpeg.
         """
         return [self._executable, *self._options.build()]
 
@@ -59,7 +62,7 @@ class FFmpeg(EventEmitter):
 
     def input(
         self,
-        url: Union[str, os.PathLike],
+        url: Union[str, os.PathLike[str]],
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ) -> Self:
@@ -102,7 +105,7 @@ class FFmpeg(EventEmitter):
 
     def output(
         self,
-        url: Union[str, os.PathLike],
+        url: Union[str, os.PathLike[str]],
         options: Optional[dict[str, Optional[types.Option]]] = None,
         **kwargs: Optional[types.Option],
     ) -> Self:
@@ -143,7 +146,7 @@ class FFmpeg(EventEmitter):
         self._options.output(url, options, **kwargs)
         return self
 
-    def execute(self, stream: Optional[Union[bytes, IO[bytes]]] = None, timeout: Optional[float] = None) -> bytes:
+    def execute(self, stream: Optional[types.Stream] = None, timeout: Optional[float] = None) -> bytes:
         """Execute FFmpeg using specified global options and files.
 
         Args:
@@ -179,12 +182,11 @@ class FFmpeg(EventEmitter):
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             self._executed = True
-            futures = [
-                executor.submit(self._write_stdin, stream),
-                executor.submit(self._read_stdout),
-                executor.submit(self._handle_stderr),
-                executor.submit(self._process.wait, timeout),
-            ]
+            stdin_task = executor.submit(self._write_stdin, stream)
+            stdout_task = executor.submit(self._read_stdout)
+            stderr_task = executor.submit(self._handle_stderr)
+            process_task = executor.submit(self._process.wait, timeout)
+            futures: list[concurrent.futures.Future[Any]] = [stdin_task, stdout_task, stderr_task, process_task]
             done, pending = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_EXCEPTION)
             self._executed = False
 
@@ -201,9 +203,9 @@ class FFmpeg(EventEmitter):
         elif self._terminated:
             self.emit("terminated")
         else:
-            raise FFmpegError.create(message=futures[2].result(), arguments=self.arguments)
+            raise FFmpegError.create(message=stderr_task.result(), arguments=self.arguments)
 
-        return futures[1].result()
+        return stdout_task.result()
 
     def terminate(self):
         """Gracefully terminate the running FFmpeg process.
@@ -215,13 +217,13 @@ class FFmpeg(EventEmitter):
             raise FFmpegError("FFmpeg is not executed", arguments=self.arguments)
 
         sigterm = signal.SIGTERM
-        if is_windows():
+        if sys.platform == "win32":
             # On Windows, SIGTERM is an alias for TerminateProcess().
             # To gracefully terminate the FFmpeg process, we should use CTRL_BREAK_EVENT signal.
             # References:
             # - https://docs.python.org/3/library/subprocess.html#subprocess.Popen.send_signal
             # - https://github.com/FFmpeg/FFmpeg/blob/release/5.1/fftools/ffmpeg.c#L371
-            sigterm = signal.CTRL_BREAK_EVENT  # type: ignore
+            sigterm = signal.CTRL_BREAK_EVENT
 
         self._terminated = True
         self._process.send_signal(sigterm)

@@ -3,3 +3,13 @@ from .ffmpeg import FFmpeg
 from .progress import Progress
 
 __version__ = "2.0.12"
+
+__all__ = [
+    "FFmpeg",
+    "FFmpegAlreadyExecuted",
+    "FFmpegError",
+    "FFmpegFileNotFound",
+    "FFmpegInvalidCommand",
+    "FFmpegUnsupportedCodec",
+    "Progress",
+]

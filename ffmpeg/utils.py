@@ -5,9 +5,10 @@ import re
 import subprocess
 import sys
 from datetime import timedelta
-from typing import IO, Any, Iterable
+from typing import IO, TYPE_CHECKING, Any, AnyStr, Iterable
 
-from ffmpeg import types
+if TYPE_CHECKING:
+    from ffmpeg import types
 
 
 def parse_time(time: str) -> timedelta:
@@ -21,6 +22,7 @@ def parse_time(time: str) -> timedelta:
         milliseconds=int(match.group(4)) * 10,
     )
 
+
 # https://github.com/FFmpeg/FFmpeg/blob/d38bf5e08e768722096723b5c8781cd2eb18d070/fftools/ffmpeg.c#L618C53-L618C56
 def parse_size(item: str) -> int:
     if "kB" in item:
@@ -30,18 +32,15 @@ def parse_size(item: str) -> int:
     else:
         raise ValueError(f"Unknown size format: {item}")
 
-def is_windows() -> bool:
-    return sys.platform == "win32"
 
-
-def create_subprocess(*args: Any, **kwargs: Any) -> subprocess.Popen:
-    # On Windows, CREATE_NEW_PROCESS_GROUP flag is required to use CTRL_BREAK_EVENT signal,
-    # which is required to gracefully terminate the FFmpeg process.
-    # Reference: https://docs.python.org/3/library/subprocess.html#subprocess.Popen.send_signal
-    if is_windows():
-        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore
-
-    return subprocess.Popen(*args, **kwargs)
+class create_subprocess(subprocess.Popen[AnyStr]):
+    def __init__(self, *args: Any, creationflags: int = 0, **kwargs: Any):
+        # On Windows, CREATE_NEW_PROCESS_GROUP flag is required to use CTRL_BREAK_EVENT signal,
+        # which is required to gracefully terminate the FFmpeg process.
+        # Reference: https://docs.python.org/3/library/subprocess.html#subprocess.Popen.send_signal
+        if sys.platform == "win32":
+            creationflags |= subprocess.CREATE_NEW_PROCESS_GROUP
+        super().__init__(*args, creationflags=creationflags, **kwargs)
 
 
 def ensure_io(stream: types.Stream) -> IO[bytes]:

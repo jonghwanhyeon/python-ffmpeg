@@ -3,24 +3,34 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import timedelta
-from typing import Optional
+from typing import Callable, Optional, TypedDict
 
 from typing_extensions import Self
 
-from ffmpeg.utils import parse_time, parse_size
+from ffmpeg.utils import parse_size, parse_time
 
 # Reference: https://github.com/FFmpeg/FFmpeg/blob/release/6.1/fftools/ffmpeg.c#L496
 
 _pattern = re.compile(r"(frame|fps|size|time|bitrate|speed)\s*\=\s*(\S+)")
 
-_field_factory = {
-    "frame": int,
-    "fps": float,
-    "size": parse_size,
-    "time": parse_time,
-    "bitrate": lambda item: float(item.replace("kbits/s", "")),
-    "speed": lambda item: float(item.replace("x", "")),
-}
+
+class FieldFactory(TypedDict):
+    frame: Callable[[str], int]
+    fps: Callable[[str], float]
+    size: Callable[[str], int]
+    time: Callable[[str], timedelta]
+    bitrate: Callable[[str], float]
+    speed: Callable[[str], float]
+
+
+_field_factory = FieldFactory(
+    frame=int,
+    fps=float,
+    size=parse_size,
+    time=parse_time,
+    bitrate=lambda item: float(item.replace("kbits/s", "")),
+    speed=lambda item: float(item.replace("x", "")),
+)
 
 
 @dataclass(frozen=True)
@@ -42,5 +52,9 @@ class Statistics:
             # - frame, fps, size, time, bitrate, speed
             return None
 
-        fields = {key: _field_factory[key](value) for key, value in statistics.items() if value != "N/A"}
+        fields = {
+            key: _field_factory[key](value)
+            for key, value in statistics.items()
+            if value != "N/A" and key in _field_factory
+        }
         return cls(**fields)
