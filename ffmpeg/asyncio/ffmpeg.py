@@ -255,11 +255,16 @@ class FFmpeg(AsyncIOEventEmitter):
     async def _handle_stderr(self) -> str:
         assert self._process.stderr is not None
 
+        # See the comment in the sync FFmpeg._handle_stderr(): ffmpeg can
+        # truncate a metadata value mid-character when logging it, which
+        # produces invalid UTF-8 even when the source text was valid.
+        # errors="replace" keeps that line usable instead of raising
+        # UnicodeDecodeError.
         line = b""
         async for line in readlines(self._process.stderr):
-            self.emit("stderr", line.decode())
+            self.emit("stderr", line.decode(errors="replace"))
 
-        return line.decode()
+        return line.decode(errors="replace")
 
     def _reraise_exception(self, exception: Exception):
         raise exception
