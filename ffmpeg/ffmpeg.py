@@ -177,6 +177,8 @@ class FFmpeg(EventEmitter):
             stderr=subprocess.PIPE,
         )
 
+        self.emit("started", self._process)
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             self._executed = True
             futures = [
@@ -251,9 +253,15 @@ class FFmpeg(EventEmitter):
     def _handle_stderr(self) -> str:
         assert self._process.stderr is not None
 
+        # FFmpeg truncates long metadata values (e.g. a title/comment tag) at a
+        # fixed byte length when logging them, without regard for multi-byte
+        # UTF-8 character boundaries. That can leave an incomplete sequence at
+        # the cut point, which isn't valid UTF-8 even though the source text
+        # was. Decoding with errors="replace" keeps that line (and the ffmpeg
+        # invocation) usable instead of raising UnicodeDecodeError.
         line = b""
         for line in readlines(self._process.stderr):
-            self.emit("stderr", line.decode())
+            self.emit("stderr", line.decode(errors="replace"))
 
         self._process.stderr.close()
-        return line.decode()
+        return line.decode(errors="replace")

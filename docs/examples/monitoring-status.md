@@ -28,6 +28,11 @@ In **python-ffmpeg**, the processing status of ffmpeg can be monitored through e
         def on_start(arguments: list[str]):
             print("arguments:", arguments)
 
+        @ffmpeg.on("started")
+        def on_started(process: subprocess.Popen):
+            print("process id: {process.pid}")
+            os.setpriority(os.PRIO_PROCESS, process.pid, 10)
+
         @ffmpeg.on("stderr")
         def on_stderr(line):
             print("stderr:", line)
@@ -79,6 +84,11 @@ In **python-ffmpeg**, the processing status of ffmpeg can be monitored through e
         @ffmpeg.on("start")
         def on_start(arguments: list[str]):
             print("arguments:", arguments)
+
+        @ffmpeg.on("started")
+        def on_started(process: subprocess.Popen):
+            print("process id: {process.pid}")
+            os.setpriority(os.PRIO_PROCESS, process.pid, 10)
 
         @ffmpeg.on("stderr")
         def on_stderr(line):

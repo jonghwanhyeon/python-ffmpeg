@@ -37,6 +37,15 @@ This event is emitted just before `FFmpeg` is executed.
 |-------------|-------------|-----------------------------------------|
 | `arguments` | `list[str]` | A list of arguments to execute `FFmpeg` |
 
+### `started`
+This event is emitted just after `FFmpeg` is executed.
+
+**Parameters:**
+
+|    Name     |     Type    |               Description               |
+|-------------|-------------|-----------------------------------------|
+| `process` | `Popen` | The process object created right after starting `FFmpeg` |
+
 
 ### `stderr`
 This event is emitted when a line is output to the standard error by `FFmpeg`.
