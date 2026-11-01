@@ -125,3 +125,15 @@ def test_raises_unsupported_codec_for_invalid_encoders(
             )
             .execute()
         )
+
+
+def test_handle_stderr_non_utf8():
+    import io
+    from unittest.mock import MagicMock
+
+    ffmpeg = FFmpeg()
+    mock_proc = MagicMock()
+    mock_proc.stderr = io.BytesIO(b"Non-UTF8 line: \xce\xe1\xf0\xe0\n")
+    ffmpeg._process = mock_proc
+    output = ffmpeg._handle_stderr()
+    assert "Non-UTF8 line:" in output
